@@ -105,7 +105,7 @@ Comparte paleta y logo con `Calculadora_Battsaver_v5.html` (Manual de Marca): na
 - Formato numérico con `toLocaleString("es-CO", …)`.
 - Decimales con coma (`.replace(".",",")`), consistente con v5.
 - Validación con Playwright: capturas en desktop (caso por defecto + caso camión 24V con 2 baterías) y móvil, más verificación aritmética directa vía `page.eval_on_selector` contrastando el resultado esperado a mano antes de dar por buena cualquier cifra en pantalla.
-- Un solo archivo HTML, sin versionado interno de commits — versiones anteriores (si las hay) se conservan como archivos separados en la misma carpeta, no se sobrescriben.
+- Un solo archivo HTML; versiones anteriores (si las hay) se conservan como archivos separados en la misma carpeta, no se sobrescriben. Desde julio 2026 la carpeta sí está versionada con git (ver §10) — eso no cambia la convención de no sobrescribir versiones con nombres distintos.
 
 ---
 
@@ -127,3 +127,15 @@ Comparte paleta y logo con `Calculadora_Battsaver_v5.html` (Manual de Marca): na
 - No agregar el impacto de fabricar la batería nueva de reemplazo (minería, fundición primaria) a menos que se pida explícitamente — el modelo actual es deliberadamente conservador y cubre solo el reciclaje de la batería que se deja de desechar.
 - No cambiar "tú/tu" de vuelta a "usted/su".
 - No tocar los factores de §3 (1,5 kg/kg, 15% escoria, 22 kg/árbol, 0,17 kg/km) sin dejar registro del cambio en esta misma tabla — son supuestos de negocio verificados, no bugs.
+
+---
+
+## 10. Repositorio y despliegue
+
+Desde julio 2026 la carpeta está en git y publicada:
+
+- **Repo GitHub**: [github.com/miguelrpo/battsaver-calc-ambiental](https://github.com/miguelrpo/battsaver-calc-ambiental) (público, remoto `origin` por SSH).
+- **URL en vivo (GitHub Pages)**: https://miguelrpo.github.io/battsaver-calc-ambiental/ — servida desde la raíz de la rama `main`, sin build step (Pages sirve los archivos tal cual).
+- `index.html` es únicamente una redirección (`<meta http-equiv="refresh">`) hacia `Calculadora_Ambiental_Battsaver_v1.html`. Existe solo para que la raíz del sitio de Pages resuelva a algo — **no renombrar** `Calculadora_Ambiental_Battsaver_v1.html` a `index.html`, porque rompería la convención de versiones como archivos separados (§7) y el enlace directo que ya se pueda estar compartiendo.
+- Para publicar cambios: commit + `git push origin main` — Pages se reconstruye solo (build "legacy", tarda ~15–30s en verse reflejado).
+- No hay CI ni pasos de build: cualquier archivo en la raíz de `main` queda servido tal cual en Pages.
