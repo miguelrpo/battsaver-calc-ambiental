@@ -90,8 +90,8 @@ Comparte paleta y logo con la calculadora comercial (`Calculadora_Battsaver.html
 - `--bs-blue #003B5C` (Pantone 302 C) protagonista — header, hero, sticky bar.
 - `--bs-ink #0B1D35` reemplaza al negro puro.
 - `--bs-electric #16A3CC` (+ soft/tint) — acento de **producto/UI**: focus, slider, ícono del bloque de escoria (antes usaba el teal viejo vía `rgba(14,140,127,...)`, ahora `rgba(22,163,204,...)`).
-- `--bs-sunset*` (gradiente `#FFD9A6→#E2643C`) — acento **sunset**, solo marketing/cierre: eyebrow del hero, tagline del header ("Más vida para tu batería"), la caja `.pitch` de cierre y el valor destacado de la sticky bar móvil.
-- Ámbar reservado exclusivamente para advertencias reales (no se usa en esta calculadora). La caja de escoria sigue siendo **navy**, no ámbar ni sunset, a propósito: no es una advertencia ni un momento de cierre comercial, es una cifra dura de impacto evitado (ver §4 y §9).
+- `--bs-sunset*` (gradiente `#FFD9A6→#E2643C`) — acento **sunset**, usado en: eyebrow del hero, **label `.slag .t` ("Escoria tóxica que no se genera")** — a pedido explícito de Miguel, para que ambos labels destacados sobre navy (CO₂ y escoria) se vean consistentes —, tagline del header ("Más vida para tu batería"), la caja `.pitch` de cierre y el valor destacado de la sticky bar móvil.
+- Ámbar reservado exclusivamente para advertencias reales (no se usa en esta calculadora). El **fondo** de la caja de escoria sigue siendo **navy**, no ámbar, a propósito: no es una advertencia, es una cifra dura de impacto evitado (ver §4 y §9). Solo el label de texto usa sunset, no el fondo de la caja.
 - Sombras tintadas de azul 302 C (`rgba(0,59,92,...)`), nunca negras.
 - **Implementación**: los tokens `--bs-*` viven en `:root`; las variables antiguas (`--navy`, `--teal`, `--mint`, etc.) quedan como alias hacia los tokens nuevos — no se tocó lógica, estructura ni ninguna regla que ya usara esas variables.
 
@@ -131,8 +131,8 @@ Tipografía oficial **Cloud**, sustituida temporalmente por Plus Jakarta Sans co
 
 ## 9. Qué NO hacer sin confirmar explícitamente
 
-- No usar ámbar **ni sunset** para el bloque de escoria — es navy a propósito (ver §4/§5). Ámbar es solo para advertencias reales; sunset es solo para momentos de marketing/cierre, y la escoria es una cifra dura de impacto, no un cierre de venta.
-- No usar sunset en controles de UI de producto (inputs, sliders) — solo en los puntos de marketing ya definidos en §5.
+- No cambiar el **fondo** del bloque de escoria a ámbar ni a sunset — sigue siendo navy a propósito (ver §4/§5). Ámbar es solo para advertencias reales. El label de texto (`.slag .t`) sí usa sunset, a pedido explícito de Miguel (ver §5) — eso no aplica al fondo de la caja.
+- No usar sunset en controles de UI de producto (inputs, sliders) — solo en los puntos de marketing/labels destacados ya definidos en §5.
 - No mostrar cantidad de baterías salvadas sin desglosar por posición/vehículo — el KPI "Baterías salvadas" siempre debe traer la nota de cuántas posiciones y vehículos hay detrás.
 - No cambiar el supuesto de "la vida se duplica con Battsaver" sin coordinarlo con la calculadora comercial — ambas herramientas deben seguir contando la misma historia de negocio.
 - No agregar el impacto de fabricar la batería nueva de reemplazo (minería, fundición primaria) a menos que se pida explícitamente — el modelo actual es deliberadamente conservador y cubre solo el reciclaje de la batería que se deja de desechar.
