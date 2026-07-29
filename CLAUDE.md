@@ -70,6 +70,19 @@ Se contrastaron los cinco supuestos numéricos contra fuentes externas. Ninguno 
 
 Si se audita esta calculadora externamente, los dos puntos a explicar primero son el factor de 1,5 kg/kg (es un promedio de industria) y el de 0,17 kg/km (está en el extremo alto).
 
+### Dirección de uso de cada factor (importante, julio 2026)
+
+"Extremo alto del rango" **no significa lo mismo** en todos los factores: depende de si el factor multiplica o divide el resultado. Esto se analizó al construir el bloque de metodología (§11) y corrige la lectura de riesgo de la tabla de arriba:
+
+| Factor | Cómo se usa | Un valor alto… | Posición actual | Efecto neto |
+|---|---|---|---|---|
+| 1,5 kg CO₂e/kg | **multiplica** el CO₂ del hero | infla el resultado | punto medio de 0,9–2,5 | neutro |
+| 15% escoria | **multiplica** la escoria destacada | infla el resultado | **tope** de la banda 8%–15% | **el supuesto menos conservador del modelo** |
+| 22 kg/árbol | **divide** (CO₂ ÷ 22) | da *menos* árboles | ligeramente alto vs EPA 21,7 | conservador |
+| 0,17 kg/km | **divide** (CO₂ ÷ 0,17) | da *menos* km | alto del rango típico | conservador |
+
+Consecuencia: el pendiente que pedía evaluar bajar el 0,17 a 0,12–0,15 estaba invertido en su lógica de riesgo — bajarlo **aumentaría** los km equivalentes mostrados, o sea inflaría la cifra divulgativa. Se deja en 0,17 por ser la opción conservadora, y así queda declarado en la UI. El único factor que sí queda en el extremo generoso es la escoria al 15% (ver §8, pendiente abierto).
+
 ---
 
 ## 4. Reglas de UI/UX ya decididas
@@ -80,6 +93,7 @@ Si se audita esta calculadora externamente, los dos puntos a explicar primero so
 - Las equivalencias (árboles, km no recorridos) son **apoyo divulgativo**, secundarias al dato duro de CO₂ y escoria — no deben competir en tamaño visual con el hero ni con el bloque de escoria.
 - El horizonte de análisis (slider de 1 a 10 años) es independiente de la vida de la batería; ambos controles alimentan la misma fórmula.
 - Botón "⤓ Guardar PDF" con `window.print()` y hoja de impresión dedicada, igual que en la calculadora comercial.
+- El bloque de **metodología** (§11) va **colapsado por defecto** — decisión explícita de Miguel: la calculadora abre limpia, sin el anexo técnico encima, y la metodología se despliega a demanda. Su estética es deliberadamente sobria (sin sunset, sin cifras grandes, sin hero): que se lea como anexo técnico y no como pieza de venta es parte del argumento frente a un auditor de sostenibilidad.
 
 ---
 
@@ -125,7 +139,9 @@ Tipografía oficial **Cloud**, sustituida temporalmente por Plus Jakarta Sans co
 2. **Comparativo con calculadora comercial**: podría valer la pena, a futuro, una vista que combine ahorro en pesos (v5) + impacto ambiental (este archivo) en una sola propuesta, pero hoy son herramientas separadas y no comparten estado — no fusionar sin pedirlo explícitamente.
 3. **Botón de reinicio** de inputs a valores por defecto — no implementado.
 4. **Accesibilidad de segmented controls** (`.seg`): mismo pendiente que en v5, impacto bajo para uso comercial en vivo.
-5. **Revisión del factor de 0,17 kg CO₂/km** — evaluar si conviene bajarlo al rango 0,12–0,15 para estar más alineado con el promedio global citado, o dejarlo y documentarlo explícitamente como "parque automotor típico colombiano" en el pie de página (hoy el pie solo dice "carro a gasolina promedio").
+5. ~~**Revisión del factor de 0,17 kg CO₂/km**~~ — **cerrado (julio 2026)**. Se analizó la dirección de uso (ver §3): al ser divisor, 0,17 produce *menos* kilómetros equivalentes, así que es la opción conservadora. Bajarlo a 0,12–0,15 inflaría la cifra. Se deja en 0,17 y queda declarado como conservador en la tabla de factores de la UI.
+6. **Factor de escoria al 15%** — *abierto, decisión de negocio*. Es el único supuesto que queda en el extremo generoso de su banda (8%–15%) y multiplica directamente la cifra más destacada de la herramienta. Hoy la UI lo declara como "extremo alto" y muestra la banda completa, que es la salida honesta; la alternativa más defendible sería mover el valor puntual al centro de la banda (~11%–12%) y perder ~25% de la cifra de escoria. No cambiar sin decisión explícita de Miguel.
+7. **Fuentes nominales de la tabla de factores** — hoy solo el factor de árbol cita fuente por nombre (US EPA, Greenhouse Gas Equivalencies Calculator), que es la única referencia documentada. Los demás describen honestamente la base de evidencia sin citar estudios concretos, a propósito: **no se inventaron citas**. Para que el pie sea auditable de verdad hay que reemplazar esas descripciones por las referencias reales (estudio de ACV de fundición secundaria de plomo, fuente del rango de escoria). Ver `FACTORS` en el `<script>`.
 
 ---
 
@@ -137,7 +153,10 @@ Tipografía oficial **Cloud**, sustituida temporalmente por Plus Jakarta Sans co
 - No cambiar el supuesto de "la vida se duplica con Battsaver" sin coordinarlo con la calculadora comercial — ambas herramientas deben seguir contando la misma historia de negocio.
 - No agregar el impacto de fabricar la batería nueva de reemplazo (minería, fundición primaria) a menos que se pida explícitamente — el modelo actual es deliberadamente conservador y cubre solo el reciclaje de la batería que se deja de desechar.
 - No cambiar "tú/tu" de vuelta a "usted/su".
-- No tocar los factores de §3 (1,5 kg/kg, 15% escoria, 22 kg/árbol, 0,17 kg/km) sin dejar registro del cambio en esta misma tabla — son supuestos de negocio verificados, no bugs.
+- No tocar los factores de §3 (1,5 kg/kg, 15% escoria, 22 kg/árbol, 0,17 kg/km) sin dejar registro del cambio en esta misma tabla — son supuestos de negocio verificados, no bugs. Si se cambia un factor, actualizar también su **banda** (`EF_CO2_RANGE`, `SLAG_RANGE`) y su ficha en `FACTORS`.
+- **No suavizar ni quitar las declaraciones incómodas del bloque de metodología** (§11): que la escoria usa el tope de su banda, que la extensión ×2 es supuesto propio y no literatura, y que no se resta la huella del propio Battsaver. Son precisamente lo que hace creíble el resto de la herramienta ante un auditor entrenado en detectar greenwashing — quitarlas la devuelve a folleto.
+- **No inventar citas ni referencias** para llenar la columna de fuentes. Vago pero honesto le gana siempre a preciso pero fabricado: una cita falsa detectada destruye la credibilidad de toda la calculadora. Ver §8, pendiente 7.
+- No abrir el bloque de metodología por defecto (va colapsado, ver §4) ni sacarlo del PDF (al imprimir sí se fuerza abierto).
 
 ---
 
@@ -150,3 +169,25 @@ Desde julio 2026 la carpeta está en git y publicada:
 - `index.html` es únicamente una redirección (`<meta http-equiv="refresh">`) hacia `Calculadora_Ambiental_Battsaver_v1.html`. Existe solo para que la raíz del sitio de Pages resuelva a algo — **no renombrar** `Calculadora_Ambiental_Battsaver_v1.html` a `index.html`, porque rompería la convención de versiones como archivos separados (§7) y el enlace directo que ya se pueda estar compartiendo.
 - Para publicar cambios: commit + `git push origin main` — Pages se reconstruye solo (build "legacy", tarda ~15–30s en verse reflejado).
 - No hay CI ni pasos de build: cualquier archivo en la raíz de `main` queda servido tal cual en Pages.
+
+---
+
+## 11. Bloque de metodología y fuentes (julio 2026)
+
+Añadido porque el interlocutor real de esta pieza —un director de sostenibilidad— está entrenado para detectar greenwashing y castiga con desconfianza total. La diferencia con la calculadora de repago es que **aquí la metodología visible es el producto**, no un anexo opcional: sin ella la herramienta se lee como folleto verde.
+
+`<details id="metodologia">` a ancho completo debajo del grid, **colapsado por defecto** (§4), con cuatro piezas:
+
+1. **Cadena de cálculo con los datos en pantalla** (`#mSteps`) — los seis pasos con la aritmética real, re-renderizados en cada cambio de input. El objetivo es que el resultado se pueda rehacer a mano en una servilleta sin pedirnos nada. Incluye la aclaración de que se contabiliza *la diferencia* de reemplazos, no el parque completo.
+2. **Tabla de factores** (`#mFactors`, desde la constante `FACTORS`) — parámetro, valor, banda de la literatura, base de la cifra y un **chip de posición**: `cons` (conservador en su dirección de uso), `mid` (punto medio), `high` (extremo alto → infla), `own` (supuesto propio, no literatura). Ese chip es lo que convierte la tabla en instrumento; declarar dónde estamos siendo generosos es lo que compra credibilidad para el resto.
+3. **Qué NO está incluido** — fabricación de la batería de reemplazo, transporte, huella del propio Battsaver, contaminantes distintos de CO₂e, descuento temporal. El modelo es incompleto *hacia abajo* y decirlo es una ventaja, no una debilidad.
+4. **Banda de sensibilidad** (`#mSens`) — con los datos en pantalla, entre qué y qué estaría el CO₂ y la escoria si el factor se moviera dentro de su banda. Más el efecto de que la extensión de vida fuera ×1,5 en vez de ×2 (67% del resultado, `#mExt`).
+
+Notas de implementación:
+
+- El chip `high` usa **ámbar**, y es uso legítimo de la excepción de §5 (ámbar solo para advertencias reales): advertir sobre nuestro propio supuesto más generoso es exactamente una advertencia real.
+- El bloque **no usa sunset** — no es un momento comercial.
+- Va colapsado en pantalla, pero **el contenido siempre está renderizado en el DOM** (`renderMethod()` corre en cada `render()`, esté plegado o no) — de eso dependen tanto la impresión como el despliegue instantáneo.
+- `beforeprint` fuerza `open = true`: la metodología siempre viaja en el PDF, que es el anexo que se queda el cliente. En impresión arranca en página nueva (`break-before:page`).
+- Enlace `.methodlink` desde la tarjeta de resultados hacia `#metodologia`; **su handler pone `open = true` antes del salto**, si no el ancla aterrizaría en un bloque cerrado. Se oculta al imprimir.
+- En móvil (≤640px) la operación de cada paso baja a su propia línea, indentada 28px bajo el rótulo, para que las seis filas se lean uniformes.

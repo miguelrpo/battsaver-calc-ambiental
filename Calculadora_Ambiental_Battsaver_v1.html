@@ -204,6 +204,100 @@
   .foot a{color:var(--teal-d);text-decoration:none;font-weight:600}
   .assumpt{font-size:11px;color:var(--steel);margin-top:5px}
 
+  /* ---------- Metodología y fuentes ---------- */
+  /* Bloque deliberadamente sobrio: sin sunset, sin hero, sin cifras grandes.
+     Es un instrumento técnico, no un argumento de venta — que se lea así
+     es parte del argumento. */
+  .method{margin-top:22px}
+  .method summary{
+    list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;
+    font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--steel);font-weight:700;
+  }
+  .method summary::-webkit-details-marker{display:none}
+  .method summary::before{content:"";width:4px;height:14px;background:var(--teal);border-radius:2px}
+  .method summary::after{content:"▾";margin-left:auto;font-size:13px;letter-spacing:0;transition:transform .15s}
+  .method[open] summary::after{transform:rotate(180deg)}
+  .method summary:focus-visible{outline:0;box-shadow:var(--ring);border-radius:6px}
+
+  .mintro{
+    font-size:13px;color:var(--bs-text-2);line-height:1.6;
+    background:var(--bg);border-left:3px solid var(--teal);border-radius:9px;
+    padding:12px 14px;margin:18px 0 20px;
+  }
+  .mintro b{color:var(--ink)}
+  .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  @media(max-width:860px){.mgrid{grid-template-columns:1fr}}
+  .msec{break-inside:avoid}
+  .msec + .msec{margin-top:24px}
+  .msec h3{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--navy);font-weight:700;margin-bottom:10px;
+  }
+  .msec p{font-size:12.5px;color:var(--bs-text-2);line-height:1.6;margin-top:10px}
+  .msec p b{color:var(--ink)}
+
+  /* cadena de cálculo, con los números en pantalla */
+  .steps{list-style:none;counter-reset:s}
+  .steps li{
+    counter-increment:s;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;
+    padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px;
+  }
+  .steps li:last-child{border-bottom:0}
+  .steps li::before{
+    content:counter(s);flex:0 0 auto;width:18px;height:18px;border-radius:50%;
+    background:var(--bs-fill);color:var(--steel);font-size:10px;font-weight:700;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .steps .sl{flex:1 1 150px;color:var(--bs-text-2)}
+  .steps .sr{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);text-align:right;white-space:nowrap}
+  .steps li.res .sr{color:var(--teal-d)}
+
+  /* tabla de factores */
+  .mtable{width:100%;border-collapse:collapse;font-size:12px}
+  .mtable th{
+    text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--steel);font-weight:700;padding:0 8px 7px 0;border-bottom:1px solid var(--line);
+  }
+  .mtable th:nth-child(2){width:92px}
+  .mtable th:nth-child(3){width:96px}
+  .mtable td{padding:10px 8px 10px 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--bs-text-2)}
+  .mtable tr:last-child td{border-bottom:0}
+  .mtable td.p{color:var(--ink);font-weight:600;line-height:1.4}
+  .mtable td.v{font-variant-numeric:tabular-nums;font-weight:700;color:var(--navy);line-height:1.4}
+  .mtable td.v span{display:block;font-weight:500;color:var(--steel);font-size:11px;margin-top:2px}
+  .mtable td.src{font-size:11px;color:var(--steel);line-height:1.5}
+  .flag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  .flag.cons{background:#E4F1EB;color:#246B52}   /* conservador en la dirección de uso */
+  .flag.mid {background:var(--bs-fill);color:var(--bs-text-2)}
+  .flag.high{background:var(--amber-bg);color:#8A6520}  /* ámbar legítimo: advertencia real sobre un supuesto propio */
+  .flag.own {background:var(--bs-electric-tint);color:var(--teal-d)}
+
+  /* qué queda fuera del modelo */
+  .excl{list-style:none;font-size:12.5px}
+  .excl li{
+    padding:8px 0 8px 20px;position:relative;color:var(--bs-text-2);line-height:1.55;
+    border-bottom:1px solid var(--line);
+  }
+  .excl li:last-child{border-bottom:0}
+  .excl li::before{content:"—";position:absolute;left:0;top:8px;color:var(--steel);font-weight:700}
+  .excl b{color:var(--ink)}
+
+  /* banda de sensibilidad */
+  .sens{
+    background:var(--bg);border:1px solid var(--line);border-radius:11px;
+    padding:14px 16px;margin-top:12px;font-size:12.5px;color:var(--bs-text-2);line-height:1.65;
+  }
+  .sens .sv{font-variant-numeric:tabular-nums;font-weight:700;color:var(--navy)}
+  .sens .sr2{display:block;margin-top:8px}
+
+  .methodlink{
+    display:inline-block;margin-top:14px;font-size:12.5px;font-weight:600;
+    color:var(--teal-d);text-decoration:none;
+  }
+  .methodlink:hover{text-decoration:underline}
+  .methodlink:focus-visible{outline:0;box-shadow:var(--ring);border-radius:6px}
+
   /* ---------- Cabecera de resultados con botón PDF ---------- */
   .cardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
   .cardhead h2{margin-bottom:0}
@@ -232,6 +326,9 @@
     #sku{display:grid;grid-template-columns:1fr}
     #stickyBar{display:flex}
     body{padding-bottom:64px}
+    /* la operación baja a su propia línea, alineada bajo el rótulo del paso */
+    .steps .sl{flex:1 1 100%}
+    .steps .sr{flex:1 1 100%;text-align:left;padding-left:28px;margin-top:3px}
   }
 
   /* ---------- Impresión / PDF ---------- */
@@ -241,7 +338,11 @@
     header{border-radius:0;box-shadow:none}
     .card{box-shadow:none;break-inside:avoid}
     .grid{gap:14px;margin-top:14px}
-    #stickyBar,.printbtn{display:none !important}
+    #stickyBar,.printbtn,.methodlink{display:none !important}
+    /* la metodología viaja en el PDF: es el anexo que se queda el cliente */
+    .method{break-before:page;margin-top:0}
+    .method summary::after{display:none}
+    .mgrid{gap:18px}
   }
 </style>
 </head>
@@ -362,13 +463,84 @@
 
       <div class="breakdown" id="breakdown"></div>
 
+      <a class="methodlink" href="#metodologia">▸ Cómo se calcula esto, factor por factor</a>
+
       <div class="pitch" id="pitch"></div>
     </div>
 
   </div>
 
+  <!-- ================= METODOLOGÍA ================= -->
+  <!-- Colapsada siempre por defecto: el vendedor abre la calculadora sin el anexo
+       técnico encima. Se despliega a demanda (o desde el enlace de resultados) y
+       se fuerza abierta al imprimir. -->
+  <details class="card method" id="metodologia">
+    <summary>Metodología, factores y fuentes</summary>
+
+    <div class="mintro">
+      Esta calculadora contabiliza <b>únicamente el reciclaje que se deja de hacer</b> sobre las baterías
+      que no se reemplazan. No suma la fabricación de la batería nueva, ni el transporte, ni la huella del
+      propio equipo Battsaver. Es un modelo <b>deliberadamente incompleto hacia abajo</b>: el impacto real
+      evitado es mayor que el que se muestra, y donde un supuesto queda en el extremo generoso de su rango
+      lo señalamos abajo en vez de esconderlo.
+    </div>
+
+    <div class="mgrid">
+
+      <div>
+        <div class="msec">
+          <h3>Cadena de cálculo, con tus datos</h3>
+          <ol class="steps" id="mSteps"></ol>
+          <p>
+            El paso 2 es la clave del modelo y también su límite: se contabiliza <b>la diferencia</b> entre
+            reemplazar cada posición <i>1/vida</i> veces al año y hacerlo <i>1/(2·vida)</i> veces cuando la
+            vida se duplica. No se cuenta el parque completo de baterías, solo los reemplazos que dejan de
+            ocurrir dentro del horizonte elegido.
+          </p>
+        </div>
+
+        <div class="msec">
+          <h3>Qué NO está incluido</h3>
+          <ul class="excl">
+            <li>La <b>fabricación de la batería nueva de reemplazo</b> —minería, fundición primaria, transporte—,
+              que en el ciclo de vida suele pesar más que el reciclaje. Excluirla es la decisión más conservadora
+              del modelo.</li>
+            <li>El <b>transporte</b> de la batería usada hasta el centro de acopio o la fundición.</li>
+            <li>La huella de <b>fabricar, enviar e instalar el propio Battsaver</b>, que se restaría del resultado.</li>
+            <li>Emisiones de <b>plomo, arsénico y SO₂ al aire</b> y efluentes líquidos de la fundición: el modelo
+              solo cuantifica CO₂e y escoria sólida.</li>
+            <li>Cualquier <b>descuento temporal</b>: la cifra es acumulada sobre el horizonte, sin anualizar.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="msec">
+          <h3>Factores y su posición en la literatura</h3>
+          <table class="mtable">
+            <thead>
+              <tr><th>Parámetro</th><th>Valor / rango</th><th>Posición</th></tr>
+            </thead>
+            <tbody id="mFactors"></tbody>
+          </table>
+        </div>
+
+        <div class="msec">
+          <h3>Sensibilidad con tus datos</h3>
+          <div class="sens" id="mSens"></div>
+          <p>
+            Si en tu operación la extensión de vida real no fuera de ×2 sino menor, el impacto evitado baja
+            en la misma proporción: con ×1,5 el resultado sería <b id="mExt">—</b> del que se muestra arriba.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
   <div class="foot">
-    Cálculo orientativo de impacto ambiental evitado. Los resultados dependen de los datos ingresados.<br>
+    Cálculo orientativo de impacto ambiental evitado. Los resultados dependen de los datos ingresados y de
+    los supuestos declarados en la metodología.<br>
     <span class="assumpt" id="assumpt"></span><br>
     <a href="https://www.battsaver.com">www.battsaver.com</a> · info@battsaver.com
   </div>
@@ -400,6 +572,59 @@ const SKUS = [
 // Equivalencias divulgativas
 const TREE_KG_YEAR = 22;   // kg CO2 que absorbe un árbol maduro al año
 const CAR_KG_KM    = 0.17; // kg CO2 por km de un carro a gasolina promedio
+
+// ================= bandas de incertidumbre =================
+// Rangos reportados para los dos factores que MULTIPLICAN el resultado.
+// Se usan solo para mostrar la sensibilidad; el cálculo principal usa los
+// valores puntuales de arriba. Si se cambia un factor, cambiar también su banda.
+const EF_CO2_RANGE = [0.9, 2.5];   // kg CO2e/kg de batería procesada
+const SLAG_RANGE   = [0.08, 0.15]; // fracción del peso total de la batería
+
+// Ficha de cada supuesto: valor, banda, dirección del sesgo y base de la cifra.
+// La columna "flag" es lo que convierte esto en instrumento y no en folleto:
+//   cons = conservador en la dirección en que se usa el factor
+//   mid  = punto medio de su rango
+//   high = extremo alto de su rango → infla el resultado, se declara
+//   own  = supuesto de producto propio, no proviene de literatura externa
+const FACTORS = [
+  {
+    p:"Emisión del reciclaje de plomo-ácido",
+    v:"1,5 kg CO₂e/kg", sub:"banda 0,9 – 2,5",
+    flag:["mid","Punto medio"],
+    src:"Rango reportado en estudios de análisis de ciclo de vida de fundición secundaria de plomo. "+
+        "Varía sobre todo con la matriz eléctrica del país y la tecnología de horno. No es una cifra "+
+        "normalizada de industria: se adopta el centro de la banda."
+  },
+  {
+    p:"Escoria de fundición generada",
+    v:"15% del peso", sub:"banda 8% – 15%",
+    flag:["high","Extremo alto"],
+    src:"La literatura reporta 13%–25% de escoria sobre el plomo producido; con ~60% de plomo en una "+
+        "batería equivale a 8%–15% del peso total. Se usa el tope de esa banda, así que esta cifra es "+
+        "la menos conservadora del modelo."
+  },
+  {
+    p:"Extensión de vida con Battsaver",
+    v:"×2", sub:"sin banda externa",
+    flag:["own","Supuesto propio"],
+    src:"Supuesto de desempeño de producto, el mismo que usa la calculadora comercial de repago. "+
+        "No proviene de literatura externa: debe sustentarse con datos de campo del propio parque."
+  },
+  {
+    p:"Absorción de un árbol maduro",
+    v:"22 kg CO₂/año", sub:"referencia ~21,7",
+    flag:["cons","Conservador"],
+    src:"US EPA, Greenhouse Gas Equivalencies Calculator. Se usa como divisor: un valor alto produce "+
+        "menos árboles equivalentes."
+  },
+  {
+    p:"Carro a gasolina",
+    v:"0,17 kg CO₂/km", sub:"banda 0,12 – 0,17",
+    flag:["cons","Conservador"],
+    src:"Extremo alto del rango típico, coherente con un parque automotor más antiguo. Al usarse como "+
+        "divisor, un factor alto produce menos kilómetros equivalentes: la cifra mostrada es la baja."
+  },
+];
 
 // ================= estado =================
 let state = { sku:0, perVeh:1, veh:20, life:2.5, years:5 };
@@ -488,8 +713,62 @@ function render(){
   // pitch
   $("pitch").innerHTML = `Cada batería que Battsaver salva es una batería que <b>no entra a los hornos de fundición</b>: son <b>${fmt(s.co2)} kg de CO₂</b> que no se emiten y <b>${s.slag.toFixed(1).replace(".",",")} kg de escoria tóxica</b> —un residuo eterno— que nunca se generan. Tu parque evita en total <b>${co2Ton>=1? fmt(co2Ton,1)+" toneladas":fmt(co2Avoided)+" kg"} de CO₂</b> y <b>${fmt(slagAvoided,1)} kg de escoria</b>: cuidado de activos que también es gestión ambiental medible.`;
 
-  // supuestos
-  $("assumpt").textContent = `Supuestos: factor de emisión del reciclaje de plomo-ácido de ${EF_CO2_PER_KG.toString().replace(".",",")} kg CO₂e por kg de batería procesada · escoria de fundición del 15% del peso nominal (rango industrial 10%–15%) · la vida de la batería se duplica con carga solar lenta sostenida · 1 árbol absorbe ~${TREE_KG_YEAR} kg CO₂/año · carro a gasolina promedio ~${CAR_KG_KM.toString().replace(".",",")} kg CO₂/km.`;
+  // supuestos (resumen; el detalle y las fuentes viven en el bloque de metodología)
+  $("assumpt").textContent = `Supuestos: reciclaje de plomo-ácido ${EF_CO2_PER_KG.toString().replace(".",",")} kg CO₂e/kg de batería procesada (banda 0,9–2,5) · escoria del 15% del peso nominal (banda 8%–15%, se usa el tope) · la vida de la batería se duplica con carga solar lenta sostenida · 1 árbol absorbe ~${TREE_KG_YEAR} kg CO₂/año · carro a gasolina ~${CAR_KG_KM.toString().replace(".",",")} kg CO₂/km. No se contabiliza la fabricación de la batería de reemplazo.`;
+
+  renderMethod(s, positions, avoidedPerPosYear, battSaved, kgAvoided, co2Avoided, slagAvoided);
+}
+
+// ================= metodología =================
+// Se re-renderiza con cada cambio de input: la cadena de cálculo y la banda de
+// sensibilidad muestran SIEMPRE los números que están en pantalla, para que el
+// resultado se pueda rehacer a mano sin pedirnos nada.
+function renderMethod(s, positions, avoidedPerPosYear, battSaved, kgAvoided, co2Avoided, slagAvoided){
+  const yr = state.years===1 ? "año" : "años";
+
+  $("mSteps").innerHTML = `
+    <li><span class="sl">Posiciones de batería protegidas</span>
+        <span class="sr">${fmt(state.veh)} × ${state.perVeh} = ${fmt(positions)}</span></li>
+    <li><span class="sl">Reemplazos evitados por posición y año</span>
+        <span class="sr">1 ÷ (2 × ${fmt(state.life,1)}) = ${fmt(avoidedPerPosYear,3)}</span></li>
+    <li><span class="sl">Baterías salvadas en ${state.years} ${yr}</span>
+        <span class="sr">${fmt(positions)} × ${fmt(avoidedPerPosYear,3)} × ${state.years} = ${fmt(battSaved,1)}</span></li>
+    <li><span class="sl">Masa de batería que no se reprocesa</span>
+        <span class="sr">${fmt(battSaved,1)} × ${fmt(s.battKg)} kg = ${fmt(kgAvoided)} kg</span></li>
+    <li class="res"><span class="sl">CO₂ evitado</span>
+        <span class="sr">${fmt(kgAvoided)} × ${EF_CO2_PER_KG.toString().replace(".",",")} = ${fmt(co2Avoided)} kg CO₂e</span></li>
+    <li class="res"><span class="sl">Escoria evitada</span>
+        <span class="sr">${fmt(kgAvoided)} × ${SLAG_PER_KG.toString().replace(".",",")} = ${fmt(slagAvoided,1)} kg</span></li>
+  `;
+
+  $("mFactors").innerHTML = FACTORS.map(f=>`
+    <tr>
+      <td class="p">${f.p}<div class="src" style="font-weight:400;margin-top:5px">${f.src}</div></td>
+      <td class="v">${f.v}<span>${f.sub}</span></td>
+      <td><span class="flag ${f.flag[0]}">${f.flag[1]}</span></td>
+    </tr>
+  `).join("");
+
+  // banda de sensibilidad sobre los dos factores que multiplican el resultado
+  const co2Lo = kgAvoided*EF_CO2_RANGE[0], co2Hi = kgAvoided*EF_CO2_RANGE[1];
+  const slagLo = kgAvoided*SLAG_RANGE[0],  slagHi = kgAvoided*SLAG_RANGE[1];
+  $("mSens").innerHTML = `
+    Con estos mismos datos, el <b>CO₂ evitado</b> estaría entre
+    <span class="sv">${fmt(co2Lo)} kg</span> y <span class="sv">${fmt(co2Hi)} kg</span>
+    según dónde caiga el factor de emisión dentro de su banda. La calculadora reporta
+    <span class="sv">${fmt(co2Avoided)} kg</span>, el punto medio.
+    <span class="sr2">
+      La <b>escoria evitada</b> estaría entre <span class="sv">${fmt(slagLo,1)} kg</span> y
+      <span class="sv">${fmt(slagHi,1)} kg</span>. La calculadora reporta
+      <span class="sv">${fmt(slagAvoided,1)} kg</span>: el extremo alto de la banda, que es el supuesto
+      menos conservador del modelo.
+    </span>
+  `;
+
+  // sensibilidad al supuesto de extensión de vida: 1/(2·v) → 1/(1,5·v) da 3/4 · (1/(2·v))·2 … ver nota
+  // evitadas/año con factor k = (1/vida)·(1 − 1/k); con k=2 → 0,50/vida, con k=1,5 → 0,333/vida
+  const ratio = (1 - 1/1.5) / (1 - 1/2);
+  $("mExt").textContent = fmt(ratio*100,0)+"%";
 }
 
 // ================= wiring =================
@@ -510,6 +789,10 @@ $("veh").addEventListener("input",e=>{
   });
 });
 
+// el enlace desde resultados despliega la metodología antes de saltar a ella
+document.querySelector(".methodlink").addEventListener("click",()=>{ $("metodologia").open = true; });
+// la metodología siempre viaja en el PDF, esté plegada o no en pantalla
+window.addEventListener("beforeprint",()=>{ $("metodologia").open = true; });
 $("printBtn").addEventListener("click",()=>window.print());
 $("stickyBar").addEventListener("click",()=>{
   document.querySelector(".results").scrollIntoView({behavior:"smooth"});
