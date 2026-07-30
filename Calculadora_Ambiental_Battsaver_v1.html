@@ -190,9 +190,6 @@
   .brow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13.5px}
   .brow .l{color:var(--steel)}
   .brow .r{font-weight:700;color:var(--ink)}
-  .brow.tot{border-top:1px dashed var(--line);margin-top:6px;padding-top:12px;font-size:15px}
-  .brow.tot .l{color:var(--navy);font-weight:700}
-  .brow.tot .r{color:var(--teal-d);font-size:18px}
 
   .pitch{
     margin-top:18px;background:var(--bs-sunset-grad);border-radius:12px;padding:15px 17px;
@@ -701,13 +698,14 @@ function render(){
   $("kTrees").textContent = fmt(co2Avoided/TREE_KG_YEAR);
   $("kKm").textContent = fmt(co2Avoided/CAR_KG_KM);
 
-  // breakdown
+  // breakdown: solo las tasas unitarias de referencia.
+  // Los totales (baterías salvadas, CO₂ acumulado) NO se repiten aquí: ya están en
+  // el KPI y en el hero de esta misma tarjeta, y la aritmética completa que los
+  // produce vive en la cadena de cálculo del bloque de metodología.
   $("breakdown").innerHTML = `
     <div class="brow"><span class="l">Batería de referencia (${s.veh})</span><span class="r">~${s.battKg} kg</span></div>
     <div class="brow"><span class="l">CO₂ evitado por batería salvada</span><span class="r">${fmt(s.co2)} kg CO₂e</span></div>
     <div class="brow"><span class="l">Escoria evitada por batería salvada</span><span class="r">${s.slag.toFixed(1).replace(".",",")} kg</span></div>
-    <div class="brow"><span class="l">Baterías salvadas en ${state.years} ${state.years===1?"año":"años"}</span><span class="r">${fmt(battSaved,1)}</span></div>
-    <div class="brow tot"><span class="l">CO₂ total que dejas de emitir</span><span class="r">${co2Ton>=1? fmt(co2Ton,2)+" t" : fmt(co2Avoided)+" kg"} CO₂e</span></div>
   `;
 
   // pitch

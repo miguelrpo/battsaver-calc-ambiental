@@ -94,6 +94,7 @@ Consecuencia: el pendiente que pedía evaluar bajar el 0,17 a 0,12–0,15 estaba
 - El horizonte de análisis (slider de 1 a 10 años) es independiente de la vida de la batería; ambos controles alimentan la misma fórmula.
 - Botón "⤓ Guardar PDF" con `window.print()` y hoja de impresión dedicada, igual que en la calculadora comercial.
 - El bloque de **metodología** (§11) va **colapsado por defecto** — decisión explícita de Miguel: la calculadora abre limpia, sin el anexo técnico encima, y la metodología se despliega a demanda. Su estética es deliberadamente sobria (sin sunset, sin cifras grandes, sin hero): que se lea como anexo técnico y no como pieza de venta es parte del argumento frente a un auditor de sostenibilidad.
+- **División de trabajo entre `#breakdown` y la cadena de cálculo (julio 2026).** El `#breakdown` de la tarjeta de resultados muestra **solo tasas unitarias de referencia** (peso de la batería, CO₂ por batería salvada, escoria por batería salvada). No lleva totales: las "baterías salvadas" ya están en el KPI y el CO₂ acumulado ya está en el hero, ambos en la misma tarjeta, y el `.pitch` de cierre repite las dos cifras finales en prosa. La aritmética completa que produce esos totales vive **únicamente** en `#mSteps` (§11). Se revisó explícitamente si la cadena de cálculo era redundante con el breakdown y la conclusión fue la inversa: el breakdown tenía tres de cinco filas duplicadas dentro de su propia tarjeta, y se recortaron esas dos filas (`Baterías salvadas`, y la fila total con su clase `.brow.tot`, cuyo CSS se eliminó por quedar muerto).
 
 ---
 
@@ -157,6 +158,7 @@ Tipografía oficial **Cloud**, sustituida temporalmente por Plus Jakarta Sans co
 - **No suavizar ni quitar las declaraciones incómodas del bloque de metodología** (§11): que la escoria usa el tope de su banda, que la extensión ×2 es supuesto propio y no literatura, y que no se resta la huella del propio Battsaver. Son precisamente lo que hace creíble el resto de la herramienta ante un auditor entrenado en detectar greenwashing — quitarlas la devuelve a folleto.
 - **No inventar citas ni referencias** para llenar la columna de fuentes. Vago pero honesto le gana siempre a preciso pero fabricado: una cita falsa detectada destruye la credibilidad de toda la calculadora. Ver §8, pendiente 7.
 - No abrir el bloque de metodología por defecto (va colapsado, ver §4) ni sacarlo del PDF (al imprimir sí se fuerza abierto).
+- **No borrar la cadena de cálculo (`#mSteps`) por parecer redundante con el breakdown**, ni devolverle al `#breakdown` las filas de total que se le quitaron (ver §4). Ya se analizó: el paso 2 (`1 ÷ (2 × vida)`, la tasa de reemplazos evitados) no aparece en ningún otro lugar de la página, y los pasos 5–6 son el único punto donde los factores de §3 se conectan con la cifra del hero —el breakdown usa los valores ya precalculados por SKU y nunca muestra que `co2 = battKg × 1,5`. Sin la cadena, la tabla de factores no alcanza para reproducir el resultado y el anexo que viaja en el PDF deja de ser auditable. Además el párrafo que sigue a `#mSteps` arranca con "El paso 2 es la clave del modelo…" y quedaría huérfano.
 
 ---
 
