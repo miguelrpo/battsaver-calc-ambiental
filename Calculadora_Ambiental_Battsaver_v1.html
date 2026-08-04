@@ -247,8 +247,15 @@
     display:inline-flex;align-items:center;justify-content:center;
   }
   .steps .sl{flex:1 1 150px;color:var(--bs-text-2)}
-  .steps .sr{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);text-align:right;white-space:nowrap}
+  /* sin nowrap: con las unidades a cuestas la operación es más larga y debe poder
+     envolver dentro de su columna en vez de desbordarse. El padding izquierdo solo
+     se nota cuando la operación no cabe al lado del rótulo y baja a su propia línea:
+     ahí la alinea bajo el rótulo, igual que en móvil */
+  .steps .sr{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);text-align:right;padding-left:28px}
   .steps li.res .sr{color:var(--teal-d)}
+  /* la unidad acompaña a su cifra sin competir con ella, y nunca se separa de
+     ella al envolver (el espacio que las une es &nbsp;) */
+  .steps .u{font-weight:500;opacity:.72;white-space:nowrap}
 
   /* tabla de factores */
   .mtable{width:100%;border-collapse:collapse;font-size:12px}
@@ -630,6 +637,12 @@ let state = { sku:0, perVeh:1, veh:20, life:2.5, years:5 };
 const $ = id => document.getElementById(id);
 const fmt = (n,dec=0) => n.toLocaleString("es-CO",{minimumFractionDigits:dec,maximumFractionDigits:dec});
 
+// Cifra + unidad para la cadena de cálculo. La unidad va en su propio span para
+// que se lea como anotación y no compita con el número; el espacio es duro para
+// que la línea nunca se parta entre la cifra y su unidad. Las unidades que
+// arrancan con "/" (por ejemplo "/año") van pegadas, sin espacio.
+const u = (n,unit) => n + (unit.charAt(0)==="/" ? "" : "&nbsp;") + `<span class="u">${unit}</span>`;
+
 function segInit(id, key, cb){
   $(id).querySelectorAll("button").forEach(b=>{
     b.addEventListener("click",()=>{
@@ -723,20 +736,24 @@ function render(){
 // resultado se pueda rehacer a mano sin pedirnos nada.
 function renderMethod(s, positions, avoidedPerPosYear, battSaved, kgAvoided, co2Avoided, slagAvoided){
   const yr = state.years===1 ? "año" : "años";
+  // unidades de cada paso, en plural según los datos en pantalla
+  const uVeh = state.veh===1 ? "vehículo" : "vehículos";
+  const uPos = positions===1 ? "posición" : "posiciones";
+  const uBpv = state.perVeh===1 ? "batería/vehículo" : "baterías/vehículo";
 
   $("mSteps").innerHTML = `
     <li><span class="sl">Posiciones de batería protegidas</span>
-        <span class="sr">${fmt(state.veh)} × ${state.perVeh} = ${fmt(positions)}</span></li>
+        <span class="sr">${u(fmt(state.veh),uVeh)} × ${u(state.perVeh,uBpv)} = ${u(fmt(positions),uPos)}</span></li>
     <li><span class="sl">Reemplazos evitados por posición y año</span>
-        <span class="sr">1 ÷ (2 × ${fmt(state.life,1)}) = ${fmt(avoidedPerPosYear,3)}</span></li>
+        <span class="sr">${u(1,"batería")} ÷ (2 × ${u(fmt(state.life,1),"años")}) = ${u(fmt(avoidedPerPosYear,3),"baterías/año")}</span></li>
     <li><span class="sl">Baterías salvadas en ${state.years} ${yr}</span>
-        <span class="sr">${fmt(positions)} × ${fmt(avoidedPerPosYear,3)} × ${state.years} = ${fmt(battSaved,1)}</span></li>
+        <span class="sr">${u(fmt(positions),uPos)} × ${u(fmt(avoidedPerPosYear,3),"baterías/año")} × ${u(state.years,yr)} = ${u(fmt(battSaved,1),"baterías")}</span></li>
     <li><span class="sl">Masa de batería que no se reprocesa</span>
-        <span class="sr">${fmt(battSaved,1)} × ${fmt(s.battKg)} kg = ${fmt(kgAvoided)} kg</span></li>
+        <span class="sr">${u(fmt(battSaved,1),"baterías")} × ${u(fmt(s.battKg),"kg/batería")} = ${u(fmt(kgAvoided),"kg")}</span></li>
     <li class="res"><span class="sl">CO₂ evitado</span>
-        <span class="sr">${fmt(kgAvoided)} × ${EF_CO2_PER_KG.toString().replace(".",",")} = ${fmt(co2Avoided)} kg CO₂e</span></li>
+        <span class="sr">${u(fmt(kgAvoided),"kg")} × ${u(EF_CO2_PER_KG.toString().replace(".",","),"kg CO₂e/kg")} = ${u(fmt(co2Avoided),"kg CO₂e")}</span></li>
     <li class="res"><span class="sl">Escoria evitada</span>
-        <span class="sr">${fmt(kgAvoided)} × ${SLAG_PER_KG.toString().replace(".",",")} = ${fmt(slagAvoided,1)} kg</span></li>
+        <span class="sr">${u(fmt(kgAvoided),"kg")} × ${u(SLAG_PER_KG.toString().replace(".",","),"kg escoria/kg")} = ${u(fmt(slagAvoided,1),"kg escoria")}</span></li>
   `;
 
   $("mFactors").innerHTML = FACTORS.map(f=>`
