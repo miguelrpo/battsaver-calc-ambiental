@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Calculadora Battsaver de impacto ambiental evitado: CO₂e y escoria tóxica que tu parque deja de generar al no reemplazar baterías, con la metodología y los factores declarados.">
 <title>Battsaver · Calculadora ambiental</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,7 +45,10 @@
     --bs-sunset-ember:#E2643C;
     --bs-sunset-grad:linear-gradient(135deg,#FFD9A6,#FFA85F 40%,#FF8F61 70%,#E2643C);
     --bs-success:#2E8B6A;
+    --bs-success-tint:#E4F1EB;  /* fill del chip "conservador" */
+    --bs-success-deep:#246B52;  /* texto del chip "conservador" */
     --bs-alert:#E2A13B;         /* solo advertencias */
+    --bs-alert-deep:#8A6520;    /* texto del chip "extremo alto" sobre ámbar */
     --bs-danger:#C8452F;
     --ring:0 0 0 3px rgba(22,163,204,.35); /* focus ring cian */
 
@@ -81,11 +85,24 @@
   }
   .logo-img{height:40px;width:auto;flex:0 0 auto;display:block}
   .brand{flex:1}
-  .brand .sub{color:var(--bs-dark-sub);font-size:12.5px;letter-spacing:.04em;margin-top:5px}
+  /* es un <h1> por semántica de documento; el peso se normaliza para que el
+     header se vea igual que cuando era un <div> */
+  .brand .sub{color:var(--bs-dark-sub);font-size:12.5px;font-weight:400;letter-spacing:.04em;margin-top:5px}
   .brand .tag{color:var(--bs-sunset);font-size:12.5px;margin-top:1px}
 
   /* ---------- Layout ---------- */
-  .grid{display:grid;grid-template-columns:1fr 1.18fr;gap:22px;margin-top:24px}
+  /* align-items:start evita que la tarjeta de inputs (4 campos) se estire para
+     igualar la altura de resultados y deje ~370px de blanco muerto */
+  .grid{display:grid;grid-template-columns:1fr 1.3fr;gap:22px;margin-top:24px;align-items:start}
+  /* Con solo cuatro campos la tarjeta de inputs mide la mitad que la de resultados
+     y dejaba ~466px de blanco. En vez de estirarla, se queda a la vista mientras
+     se recorren los resultados: el hueco pasa a ser útil. */
+  /* El guard de altura es obligatorio: sin él, en pantallas bajas la tarjeta queda
+     FIJADA siendo más alta que el viewport y sus últimos campos se vuelven
+     inalcanzables — seguir haciendo scroll ya no la mueve. */
+  @media(min-width:861px) and (min-height:820px){
+    .inputs{position:sticky;top:20px}
+  }
   @media(max-width:860px){.grid{grid-template-columns:1fr}}
 
   .card{
@@ -109,9 +126,14 @@
   .seg button{
     flex:1;border:0;background:transparent;padding:9px 8px;border-radius:7px;
     font-size:13px;font-weight:600;color:var(--steel);cursor:pointer;
-    transition:all .15s;font-family:inherit;line-height:1.25;
+    /* no "all": con transition:all el anillo de foco aparecía interpolando la
+       sombra vieja y tardaba ~320ms en verse, o sea era invisible al tabular */
+    transition:background .15s,color .15s;font-family:inherit;line-height:1.25;
   }
   .seg button.on{background:var(--navy);color:#fff;box-shadow:0 2px 6px rgba(0,59,92,.22)}
+  /* el foco de teclado usa el anillo cian de marca, igual que los inputs, en vez
+     del outline por defecto del navegador */
+  .seg button:focus-visible{outline:2px solid transparent;outline-offset:2px;box-shadow:var(--ring)}
 
   .num{position:relative;display:flex;align-items:center}
   .num input{
@@ -119,13 +141,18 @@
     font-size:15px;font-family:inherit;color:var(--ink);background:var(--white);font-weight:600;
     transition:border-color .15s,box-shadow .15s;
   }
-  .num input:focus{outline:0;border-color:var(--bs-electric);box-shadow:var(--ring)}
+  .num input:focus{outline:2px solid transparent;outline-offset:2px;border-color:var(--bs-electric);box-shadow:var(--ring)}
 
+  /* La pista se ve de 5px pero el control mide 24px de alto: el borde transparente
+     sube el área de toque hasta el mínimo de WCAG 2.5.8 sin cambiar el aspecto
+     (background-clip:content-box pinta solo la franja central). */
   input[type=range]{
-    -webkit-appearance:none;width:100%;height:5px;border-radius:4px;
+    -webkit-appearance:none;width:100%;height:24px;border-radius:4px;
     background:linear-gradient(90deg,var(--teal) var(--pct,50%),var(--line) var(--pct,50%));
-    margin-top:12px;cursor:pointer;
+    background-clip:content-box;border:solid transparent;border-width:9.5px 0;
+    margin-top:3px;cursor:pointer;
   }
+  input[type=range]:focus-visible{outline:2px solid transparent;outline-offset:2px;box-shadow:var(--ring);border-radius:6px}
   input[type=range]::-webkit-slider-thumb{
     -webkit-appearance:none;width:20px;height:20px;border-radius:50%;
     background:var(--white);border:3px solid var(--teal);cursor:pointer;
@@ -139,15 +166,15 @@
   .rangerow .v{font-size:15px;font-weight:700;color:var(--navy)}
   .rangerow .x{font-size:11.5px;color:var(--steel)}
 
+  /* inline-block, no inline-flex: el chip mezcla texto y <b> en una sola frase,
+     y con flex cada trozo se volvía un item con caja propia que al envolver
+     partía la etiqueta en columnas */
   .sku-tag{
-    display:inline-flex;align-items:center;gap:7px;margin-top:9px;
+    display:inline-block;margin-top:9px;line-height:1.45;
     background:var(--mint);color:var(--teal-d);font-size:12.5px;font-weight:700;
     padding:6px 11px;border-radius:8px;
   }
   .sku-tag .price{color:var(--navy);font-weight:600}
-
-  .modehelp{font-size:12px;color:var(--steel);margin-top:9px;line-height:1.45;
-    background:var(--bg);border-radius:9px;padding:10px 12px;border-left:3px solid var(--teal)}
 
   /* ---------- Results ---------- */
   .results h2::before{background:var(--teal)}
@@ -187,9 +214,11 @@
   .slag .d b{color:#fff}
 
   .breakdown{border-top:1px solid var(--line);padding-top:16px}
-  .brow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13.5px}
-  .brow .l{color:var(--steel)}
-  .brow .r{font-weight:700;color:var(--ink)}
+  .brow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:7px 0;font-size:13.5px}
+  .brow .l{color:var(--steel);min-width:0}
+  /* el valor nunca se parte: en móvil "~10 kg" quedaba en dos líneas y descuadraba
+     la altura de la fila contra las demás */
+  .brow .r{font-weight:700;color:var(--ink);white-space:nowrap;flex:0 0 auto}
 
   .pitch{
     margin-top:18px;background:var(--bs-sunset-grad);border-radius:12px;padding:15px 17px;
@@ -208,14 +237,20 @@
   .method{margin-top:22px}
   .method summary{
     list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;
-    font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--steel);font-weight:700;
   }
+  /* <h2> por semántica: el anexo técnico no existía en el árbol de encabezados y
+     quien navega por ellos entraba en "Cadena de cálculo" sin señal de sección.
+     La tipografía es la misma que tenía el summary. */
+  .method summary h2{
+    font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--steel);font-weight:700;margin:0;
+  }
+  .method summary h2::before{display:none}
   .method summary::-webkit-details-marker{display:none}
   .method summary::before{content:"";width:4px;height:14px;background:var(--teal);border-radius:2px}
   .method summary::after{content:"▾";margin-left:auto;font-size:13px;letter-spacing:0;transition:transform .15s}
   .method[open] summary::after{transform:rotate(180deg)}
-  .method summary:focus-visible{outline:0;box-shadow:var(--ring);border-radius:6px}
+  .method summary:focus-visible{outline:2px solid transparent;outline-offset:2px;box-shadow:var(--ring);border-radius:6px}
 
   .mintro{
     font-size:13px;color:var(--bs-text-2);line-height:1.6;
@@ -227,6 +262,8 @@
   @media(max-width:860px){.mgrid{grid-template-columns:1fr}}
   .msec{break-inside:avoid}
   .msec + .msec{margin-top:24px}
+  /* ocupa las dos columnas del grid: ver el comentario en el HTML */
+  .mgrid > .mwide{grid-column:1 / -1;margin-top:24px}
   .msec h3{
     font-size:11px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--navy);font-weight:700;margin-bottom:10px;
@@ -263,18 +300,24 @@
     text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
     color:var(--steel);font-weight:700;padding:0 8px 7px 0;border-bottom:1px solid var(--line);
   }
-  .mtable th:nth-child(2){width:92px}
+  /* 118px: es la columna que el auditor escanea primero, y a 92px el valor
+     puntual se partía en tres líneas ("1,5 kg CO₂e/kg") */
+  .mtable th:nth-child(2){width:118px}
   .mtable th:nth-child(3){width:96px}
   .mtable td{padding:10px 8px 10px 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--bs-text-2)}
   .mtable tr:last-child td{border-bottom:0}
   .mtable td.p{color:var(--ink);font-weight:600;line-height:1.4}
-  .mtable td.v{font-variant-numeric:tabular-nums;font-weight:700;color:var(--navy);line-height:1.4}
-  .mtable td.v span{display:block;font-weight:500;color:var(--steel);font-size:11px;margin-top:2px}
-  .mtable td.src{font-size:11px;color:var(--steel);line-height:1.5}
+  .mtable td.v{font-variant-numeric:tabular-nums;font-weight:700;color:var(--navy);line-height:1.4;white-space:nowrap}
+  /* la banda sí puede envolver: es la línea secundaria, no el valor puntual */
+  .mtable td.v span{display:block;font-weight:500;color:var(--steel);font-size:11px;margin-top:2px;white-space:normal}
+  /* el JS emite <div class="src"> DENTRO de td.p, no un <td class="src">: con el
+     selector viejo la fuente heredaba 12px/ink y competía con el nombre del
+     parámetro en la columna que el auditor escanea primero */
+  .mtable .src{font-size:11px;font-weight:400;color:var(--steel);line-height:1.5;margin-top:5px}
   .flag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
-  .flag.cons{background:#E4F1EB;color:#246B52}   /* conservador en la dirección de uso */
+  .flag.cons{background:var(--bs-success-tint);color:var(--bs-success-deep)}  /* conservador en la dirección de uso */
   .flag.mid {background:var(--bs-fill);color:var(--bs-text-2)}
-  .flag.high{background:var(--amber-bg);color:#8A6520}  /* ámbar legítimo: advertencia real sobre un supuesto propio */
+  .flag.high{background:var(--amber-bg);color:var(--bs-alert-deep)}  /* ámbar legítimo: advertencia real sobre un supuesto propio */
   .flag.own {background:var(--bs-electric-tint);color:var(--teal-d)}
 
   /* qué queda fuera del modelo */
@@ -300,7 +343,7 @@
     color:var(--teal-d);text-decoration:none;
   }
   .methodlink:hover{text-decoration:underline}
-  .methodlink:focus-visible{outline:0;box-shadow:var(--ring);border-radius:6px}
+  .methodlink:focus-visible{outline:2px solid transparent;outline-offset:2px;box-shadow:var(--ring);border-radius:6px}
 
   /* ---------- Cabecera de resultados con botón PDF ---------- */
   .cardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
@@ -312,6 +355,14 @@
     transition:border-color .15s, background .15s;
   }
   .printbtn:hover{border-color:var(--bs-electric);background:var(--bs-electric-tint)}
+  .printbtn:focus-visible{outline:2px solid transparent;outline-offset:2px;box-shadow:var(--ring)}
+
+  /* respeta la preferencia del sistema: sin esto no había forma de desactivar las
+     transiciones ni los scroll suaves */
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important}
+    html{scroll-behavior:auto}
+  }
 
   /* ---------- Barra sticky móvil ---------- */
   #stickyBar{
@@ -319,7 +370,9 @@
     background:var(--navy);color:#fff;padding:12px 18px;
     box-shadow:0 -4px 16px rgba(0,59,92,.25);cursor:pointer;
     justify-content:space-between;align-items:center;gap:10px;
+    width:100%;border:0;font-family:inherit;text-align:left;
   }
+  #stickyBar:focus-visible{outline:0;box-shadow:0 -4px 16px rgba(0,59,92,.25),var(--ring)}
   #stickyBar .sb-l{font-size:12px;color:var(--bs-dark-sub)}
   #stickyBar .sb-v{font-size:17px;font-weight:800;color:var(--bs-sunset)}
 
@@ -333,6 +386,12 @@
     /* la operación baja a su propia línea, alineada bajo el rótulo del paso */
     .steps .sl{flex:1 1 100%}
     .steps .sr{flex:1 1 100%;text-align:left;padding-left:28px;margin-top:3px}
+    /* Los anchos fijos de la tabla de factores suman 214px de columnas rígidas y
+       hacían desbordar TODA la página a 320px con la metodología abierta (falla de
+       WCAG 1.4.10, que se mide exactamente a ese ancho). En escritorio siguen: es
+       ahí donde se decidió que el valor puntual no se parta. */
+    .mtable th:nth-child(2),.mtable th:nth-child(3){width:auto}
+    .mtable td.v{white-space:normal}
   }
 
   /* ---------- Impresión / PDF ---------- */
@@ -343,10 +402,24 @@
     .card{box-shadow:none;break-inside:avoid}
     .grid{gap:14px;margin-top:14px}
     #stickyBar,.printbtn,.methodlink{display:none !important}
+    /* el ancho útil de Letter cae bajo el breakpoint de 860px y apilaba todo a una
+       columna: en papel se fuerzan las dos columnas de vuelta */
+    .grid{grid-template-columns:1fr 1.18fr}
+    .card{break-inside:auto}
     /* la metodología viaja en el PDF: es el anexo que se queda el cliente */
     .method{break-before:page;margin-top:0}
     .method summary::after{display:none}
-    .mgrid{gap:18px}
+    .mgrid{grid-template-columns:1fr 1fr;gap:18px}
+    /* mismo criterio que en móvil: al ancho de Letter la operación no cabe al lado
+       del rótulo, así que baja a su propia línea alineada bajo él */
+    .steps li{flex-wrap:wrap}
+    .steps .sr{flex:1 0 100%;text-align:left;padding-left:28px;margin-top:3px}
+    /* .msec entero era más alto que media página, así que break-inside:avoid dejaba
+       páginas al 70-89% en blanco. Las unidades atómicas reales son la fila y el
+       ítem, no la sección. */
+    .msec{break-inside:auto}
+    .steps li,.excl li,.mtable tr{break-inside:avoid}
+    .foot{break-before:avoid}
   }
 </style>
 </head>
@@ -356,7 +429,7 @@
   <header>
     <img src="data:image/png;base64,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7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//7NmBAAAAAMOg+VNf4QClkVwBAAAAAAB4VQMAAP//AwCZKGPE0miyPwAAAABJRU5ErkJggg==" alt="Battsaver" class="logo-img">
     <div class="brand">
-      <div class="sub">Calculadora de impacto ambiental positivo</div>
+      <h1 class="sub">Calculadora de impacto ambiental positivo</h1>
       <div class="tag">Más vida para tu batería</div>
     </div>
   </header>
@@ -369,39 +442,39 @@
 
       <!-- tipo de vehiculo -> SKU -->
       <div class="field">
-        <label class="lbl">Tipo de vehículo / batería
+        <label class="lbl" id="skuLbl">Tipo de vehículo / batería
           <span class="hint">Define el peso de la batería y el equipo Battsaver adecuado</span>
         </label>
-        <div class="seg teal" id="sku" style="flex-wrap:wrap">
-          <button data-v="0" class="on">Moto / carro pequeño · 12V</button>
-          <button data-v="1">Camioneta / camión / náutico · 12V</button>
-          <button data-v="2">Camión 24V (europeo/chino)</button>
+        <div class="seg" id="sku" style="flex-wrap:wrap" role="radiogroup" aria-labelledby="skuLbl">
+          <button type="button" role="radio" aria-checked="true"  data-v="0" class="on">Carro pequeño · 12V</button>
+          <button type="button" role="radio" aria-checked="false" data-v="1">Camioneta / camión / náutico · 12V</button>
+          <button type="button" role="radio" aria-checked="false" data-v="2">Camión 24V (europeo/chino)</button>
         </div>
         <div class="sku-tag" id="skutag"></div>
       </div>
 
       <!-- baterias por vehiculo (solo camiones) -->
       <div class="field" id="battPerVehField" style="display:none">
-        <label class="lbl">Baterías por vehículo
+        <label class="lbl" id="bpvLbl">Baterías por vehículo
           <span class="hint">Muchos camiones montan dos baterías: el impacto evitado se duplica</span>
         </label>
-        <div class="seg" id="battPerVeh">
-          <button data-v="1" class="on">1 batería</button>
-          <button data-v="2">2 baterías</button>
+        <div class="seg" id="battPerVeh" role="radiogroup" aria-labelledby="bpvLbl">
+          <button type="button" role="radio" aria-checked="true"  data-v="1" class="on">1 batería</button>
+          <button type="button" role="radio" aria-checked="false" data-v="2">2 baterías</button>
         </div>
       </div>
 
       <!-- numero de vehiculos -->
       <div class="field">
-        <label class="lbl">Vehículos protegidos con Battsaver</label>
+        <label class="lbl" for="veh">Vehículos protegidos con Battsaver</label>
         <div class="num">
-          <input type="number" id="veh" value="20" min="1" step="1">
+          <input type="number" id="veh" value="20" min="1" max="1000000" step="1" inputmode="numeric">
         </div>
       </div>
 
       <!-- vida de bateria sin battsaver -->
       <div class="field">
-        <label class="lbl">Vida de la batería sin Battsaver
+        <label class="lbl" for="life">Vida de la batería sin Battsaver
           <span class="hint">Años que dura hoy una batería en este parque; con Battsaver se duplica</span>
         </label>
         <input type="range" id="life" min="1" max="4" step="0.5" value="2.5">
@@ -410,14 +483,12 @@
 
       <!-- horizonte -->
       <div class="field">
-        <label class="lbl">Horizonte de análisis
+        <label class="lbl" for="years">Horizonte de análisis
           <span class="hint">Período sobre el que se acumula el impacto evitado</span>
         </label>
         <input type="range" id="years" min="1" max="10" step="1" value="5">
         <div class="rangerow"><span class="v" id="yearsV">5 años</span><span class="x" id="yearsOut"></span></div>
       </div>
-
-      <div class="modehelp" id="modehelp"></div>
     </div>
 
     <!-- ================= RESULTS ================= -->
@@ -427,15 +498,22 @@
         <button class="printbtn" id="printBtn" type="button">⤓ Guardar PDF</button>
       </div>
 
-      <div class="hero">
-        <div class="eyebrow">CO₂ que dejas de emitir</div>
+      <!-- aria-live: mover un slider cambiaba el resultado sin anunciar nada -->
+      <div class="hero" role="status" aria-live="polite">
+        <!-- "que dejas de emitir", en segunda persona: es la voz de marca y el
+             encabezado tiene que ser directo. El matiz contable (son emisiones
+             evitadas aguas abajo, no una reducción del inventario propio) va
+             declarado en la metodología, que es donde el auditor lo busca. -->
+        <div class="eyebrow">CO₂e que dejas de emitir</div>
         <div class="big" id="heroCo2">—</div>
         <div class="cap" id="heroCap"></div>
       </div>
 
+      <!-- aria-live propio: es la segunda cifra del encabezado y el argumento
+           diferenciador de la pieza; sin esto nunca se anunciaba al cambiar un input -->
       <div class="slag">
-        <div class="icon">☣</div>
-        <div>
+        <div class="icon" aria-hidden="true">☣</div>
+        <div role="status" aria-live="polite">
           <div class="t">Escoria tóxica que no se genera</div>
           <div class="v" id="slagVal">— <small>kg</small></div>
           <div class="d">La escoria de la fundición de plomo es un residuo <b>indestructible</b>: no se degrada ni se recicla. Cada kilogramo que no se genera es un <b>pasivo ambiental eterno</b> que tu operación evita dejarle al planeta.</div>
@@ -449,14 +527,17 @@
           <div class="note" id="kBattNote"></div>
         </div>
         <div class="kpi">
-          <div class="k">Plomo que no se reprocesa</div>
+          <div class="k">Batería que no se reprocesa</div>
           <div class="val" id="kKg">—</div>
-          <div class="note">kg de batería que no pasan por hornos de fundición</div>
+          <div class="note" id="kKgNote">kg de batería que no pasan por hornos de fundición</div>
         </div>
+        <!-- "un año de absorción de N árboles maduros", no "plantar N árboles":
+             son dos marcos distintos y el factor de 22 kg/año es el del árbol ya
+             maduro, no el de un árbol recién plantado (ver tabla de factores). -->
         <div class="kpi">
-          <div class="k">Equivale a plantar</div>
+          <div class="k">Equivale a un año de</div>
           <div class="val teal" id="kTrees">—</div>
-          <div class="note">árboles absorbiendo CO₂ durante un año</div>
+          <div class="note">árboles maduros absorbiendo CO₂e</div>
         </div>
         <div class="kpi">
           <div class="k">Equivale a no recorrer</div>
@@ -479,14 +560,19 @@
        técnico encima. Se despliega a demanda (o desde el enlace de resultados) y
        se fuerza abierta al imprimir. -->
   <details class="card method" id="metodologia">
-    <summary>Metodología, factores y fuentes</summary>
+    <summary><h2>Metodología, factores y fuentes</h2></summary>
 
     <div class="mintro">
       Esta calculadora contabiliza <b>únicamente el reciclaje que se deja de hacer</b> sobre las baterías
       que no se reemplazan. No suma la fabricación de la batería nueva, ni el transporte, ni la huella del
-      propio equipo Battsaver. Es un modelo <b>deliberadamente incompleto hacia abajo</b>: el impacto real
-      evitado es mayor que el que se muestra, y donde un supuesto queda en el extremo generoso de su rango
-      lo señalamos abajo en vez de esconderlo.
+      propio equipo Battsaver. En su <b>frontera de proceso</b> el modelo es deliberadamente incompleto hacia
+      abajo: lo que se deja fuera aumenta el impacto real, <b>con una excepción — la huella de fabricar el
+      propio equipo, que resta y no es despreciable frente al resultado en horizontes cortos</b>. Abajo se
+      listan también los <b>límites operativos</b>, que pueden mover la cifra en la otra dirección, y los
+      supuestos que quedan en el extremo generoso de su rango — en vez de esconderlos.
+      <br><br>
+      <b>Cómo se reporta.</b> Es una <b>emisión evitada</b> aguas abajo: ocurre en la fundición, no en tu
+      operación. Va en el reporte como cifra propia, no restándola de tus Alcances 1, 2 o 3.
     </div>
 
     <div class="mgrid">
@@ -501,34 +587,16 @@
             vida se duplica. No se cuenta el parque completo de baterías, solo los reemplazos que dejan de
             ocurrir dentro del horizonte elegido.
           </p>
-        </div>
-
-        <div class="msec">
-          <h3>Qué NO está incluido</h3>
-          <ul class="excl">
-            <li>La <b>fabricación de la batería nueva de reemplazo</b> —minería, fundición primaria, transporte—,
-              que en el ciclo de vida suele pesar más que el reciclaje. Excluirla es la decisión más conservadora
-              del modelo.</li>
-            <li>El <b>transporte</b> de la batería usada hasta el centro de acopio o la fundición.</li>
-            <li>La huella de <b>fabricar, enviar e instalar el propio Battsaver</b>, que se restaría del resultado.</li>
-            <li>Emisiones de <b>plomo, arsénico y SO₂ al aire</b> y efluentes líquidos de la fundición: el modelo
-              solo cuantifica CO₂e y escoria sólida.</li>
-            <li>Cualquier <b>descuento temporal</b>: la cifra es acumulada sobre el horizonte, sin anualizar.</li>
-          </ul>
+          <p>
+            Cada paso arrastra el operando <b>ya redondeado</b> del paso anterior, y esos mismos valores son
+            los que aparecen en la tarjeta de resultados: no hay dos versiones de la misma cifra en este
+            documento. Cada cifra se muestra con tres cifras significativas, así que un paso puede diferir
+            del anterior en el último dígito.
+          </p>
         </div>
       </div>
 
       <div>
-        <div class="msec">
-          <h3>Factores y su posición en la literatura</h3>
-          <table class="mtable">
-            <thead>
-              <tr><th>Parámetro</th><th>Valor / rango</th><th>Posición</th></tr>
-            </thead>
-            <tbody id="mFactors"></tbody>
-          </table>
-        </div>
-
         <div class="msec">
           <h3>Sensibilidad con tus datos</h3>
           <div class="sens" id="mSens"></div>
@@ -537,6 +605,52 @@
             en la misma proporción: con ×1,5 el resultado sería <b id="mExt">—</b> del que se muestra arriba.
           </p>
         </div>
+
+      </div>
+
+      <!-- también a ancho completo: son siete exclusiones de texto corrido y en
+           media columna desbalanceaban el grid con ~490px de blanco enfrente -->
+      <div class="msec mwide">
+          <h3>Qué NO está incluido</h3>
+          <ul class="excl">
+            <li>La <b>fabricación de la batería nueva de reemplazo</b> —minería, fundición primaria, transporte—,
+              que en el ciclo de vida suele pesar más que el reciclaje. Excluirla es la decisión más conservadora
+              del modelo.</li>
+            <li>El <b>transporte</b> de la batería usada hasta el centro de acopio o la fundición.</li>
+            <li>La huella de <b>fabricar, enviar e instalar el propio Battsaver</b>, que se restaría del
+              resultado. Es la única exclusión que va en esa dirección, y en horizontes cortos o parques
+              pequeños puede ser del mismo orden que el CO₂e evitado: conviene mirarla antes de reportar
+              la cifra como impacto neto.</li>
+            <li>Emisiones de <b>plomo, arsénico y SO₂ al aire</b> y efluentes líquidos de la fundición: el modelo
+              solo cuantifica CO₂e y escoria sólida.</li>
+            <li>Cualquier <b>descuento temporal</b>: la cifra es acumulada sobre el horizonte, sin anualizar.</li>
+            <li><b>Cuándo ocurre cada cosa.</b> Se supone que cada posición queda protegida desde el inicio de
+              la vida de su batería: instalar a media vida evita menos reemplazos dentro del horizonte. Y
+              alargar la vida además de reducir el reciclaje lo <b>difiere</b>, porque las baterías que sigan en
+              servicio al cierre se reciclarán después. Por eso la cifra se declara como evitada <b>dentro del
+              horizonte de análisis</b>, no para siempre.</li>
+            <li>La <b>tasa y la ruta de reciclaje</b>: se supone que cada batería evitada habría ido a
+              <b>fundición secundaria formal</b>, con el perfil de emisión y de escoria de las fuentes citadas
+              abajo. En reciclaje informal —frecuente en la región— ese perfil es distinto y peor, y no está
+              modelado.</li>
+            <li>Un <b>inventario en rotación</b>. El modelo supone parque fijo y el campo de vehículos es un
+              <b>stock simultáneo</b>, no un acumulado: la fórmula ya multiplica por el horizonte.</li>
+          </ul>
+      </div>
+
+      <!-- La tabla de factores va a ancho completo, no dentro de una columna: su
+           celda de fuente es texto corrido y en media columna quedaba en 283px de
+           ancho por 1287px de alto en pantalla, y ~3 páginas en el PDF con la
+           columna vecina vacía. Es la pieza que convierte el bloque en instrumento
+           (§11), así que es la que menos puede estar mal compuesta. -->
+      <div class="msec mwide">
+        <h3>Factores y su posición en la literatura</h3>
+        <table class="mtable">
+          <thead>
+            <tr><th>Parámetro</th><th>Valor / rango</th><th>Posición</th></tr>
+          </thead>
+          <tbody id="mFactors"></tbody>
+        </table>
       </div>
 
     </div>
@@ -551,38 +665,99 @@
 
 </div>
 
-<div id="stickyBar" title="Ver resultados">
-  <span class="sb-l">CO₂ evitado</span>
+<button type="button" id="stickyBar" title="Ver resultados">
+  <span class="sb-l">CO₂e evitado</span>
   <span class="sb-v" id="sbVal">—</span>
-</div>
+</button>
 
 <script>
 // ================= parámetros ambientales =================
-// Factor de emisión del reciclaje de baterías de ácido-plomo:
-// 1.5 kg CO2e por kg de batería procesada (energía térmica de hornos
-// de fundición y trituración, proporcional al peso físico).
-const EF_CO2_PER_KG = 1.5;
-// Escoria tóxica de fundición: 15% del peso nominal de la batería
-// (rango histórico de la industria: 10%–15%; se usa el peso de referencia).
-const SLAG_PER_KG = 0.15;
+// FRONTERA DEL MODELO: se contabiliza únicamente el reciclaje (fundición
+// secundaria) que se deja de hacer sobre las baterías que NO se reemplazan.
+// No incluye la fabricación de la batería nueva de reemplazo.
+//
+// Los factores de la literatura vienen expresados por kg de PLOMO, no por kg de
+// batería. Antes se usaba 1,5 kg CO2e/kg de batería con banda 0,9–2,5; ese orden
+// de magnitud corresponde a la FABRICACIÓN de una batería, no a su reciclaje, y
+// confundir esas dos fronteras es exactamente lo que un auditor busca primero.
+// Ahora el factor se declara sobre base plomo y se convierte explícitamente.
 
-// SKUs: peso de batería de referencia por tipo de vehículo
+// Contenido de plomo de una batería de arranque, como fracción del peso total.
+// La literatura de composición reporta 60%–65%; se adopta el piso porque tanto el
+// CO2 como la escoria se derivan de esta fracción y un valor bajo produce cifras
+// evitadas menores. Es un supuesto propio declarado, no una medición del parque.
+const PB_FRACTION = 0.60;
+// Banda del propio contenido de plomo. El cálculo puntual usa el piso, pero la
+// banda de sensibilidad tiene que propagar también esta incertidumbre: fijarla en
+// 0,60 para los dos extremos hacía parecer la calculadora menos incierta de lo que
+// su propia tabla de factores declara.
+const PB_RANGE = [0.60, 0.65];
+
+// Emisión del reciclaje, sobre base PLOMO:
+//   Ballantyne et al. 2018 (R. Soc. Open Sci. 5:171368): fundición ~0,55 +
+//   refinación ~0,12 = 0,67 kg CO2/kg Pb (vía pirometalúrgica).
+//   Boliden declara plomo reciclado <1 kg CO2/kg Pb (primario ~1,87).
+// Se usa el piso de esa banda: la cifra mostrada es la mínima defendible.
+const EF_CO2_PER_KG_PB = 0.67;
+const EF_CO2_PB_RANGE  = [0.67, 1.00];
+
+// Escoria de fundición, sobre base PLOMO:
+//   Pan et al. 2019 (Resour. Conserv. Recycl. 146:140-155): 100–350 kg de escoria
+//   por tonelada de plomo producido en reciclaje secundario => 10%–35% del plomo.
+// El VALOR puntual (15% del peso de batería = 25% del plomo) es decisión de
+// negocio vigente y no se toca aquí; lo que se corrigió es la banda, que antes se
+// declaraba 8%–15% y no reproducía esa fuente.
+// El valor puntual también vive en base plomo, igual que el de CO₂: los dos salen
+// del mismo horno, así que mover PB_FRACTION tiene que mover ambos. Antes
+// SLAG_PER_KG era directo sobre peso de batería y solo un comentario decía a qué
+// fracción del plomo equivalía.
+const SLAG_PER_KG_PB = 0.25;
+const SLAG_PB_RANGE  = [0.10, 0.35];
+
+// ---- derivados sobre peso total de batería, que es la base del cálculo ----
+// Los extremos combinan el extremo del factor con el extremo de la fracción de
+// plomo: piso × piso y techo × techo.
+const EF_CO2_PER_KG = +(EF_CO2_PER_KG_PB * PB_FRACTION).toFixed(2);            // 0,40
+const EF_CO2_RANGE  = [+(EF_CO2_PB_RANGE[0]*PB_RANGE[0]).toFixed(2),
+                       +(EF_CO2_PB_RANGE[1]*PB_RANGE[1]).toFixed(2)];          // 0,40–0,65
+const SLAG_PER_KG   = +(SLAG_PER_KG_PB * PB_FRACTION).toFixed(2);              // 0,15 — decisión de negocio
+const SLAG_RANGE    = [+(SLAG_PB_RANGE[0]*PB_RANGE[0]).toFixed(2),
+                       +(SLAG_PB_RANGE[1]*PB_RANGE[1]).toFixed(2)];            // 0,06–0,23
+
+// Extensión de vida útil con Battsaver. Mismo supuesto que la calculadora
+// comercial (EXT_FACTOR = 2). Declarado como constante para que la coordinación
+// entre ambas piezas sea posible sin editar fórmulas a mano.
+const EXT_FACTOR = 2;
+
+// SKUs: peso de batería de referencia por tipo de vehículo.
+// El CO2 y la escoria por batería se DERIVAN de battKg en tiempo de ejecución
+// (antes venían precalculados a mano, lo que obligaba a rehacer dos números cada
+// vez que cambiaba un peso).
+//
+// La MOTO no está en esta lista a propósito (decisión de Miguel, agosto 2026): el
+// segmento arranca en carro pequeño. Antes moto y carro pequeño compartían un
+// bucket de 10 kg, que inflaba el caso moto ~2x; la salida no fue afinar el peso
+// de la moto sino sacarla del alcance de la calculadora. El equipo 12V · 10W
+// sigue sirviendo motos comercialmente — lo que no se hace es cuantificarles
+// impacto ambiental aquí. No volver a agregarla sin pedirlo.
 const SKUS = [
-  {name:"12V · 10W", veh:"moto / carro pequeño", battKg:10, co2:15,  slag:1.5, dual:false},
-  {name:"12V · 20W", veh:"camioneta / camión / náutico", battKg:20, co2:30, slag:3.0, dual:true},
-  {name:"24V · 20W", veh:"camión 24V", battKg:20, co2:30, slag:3.0, dual:true},
-];
+  {name:"12V · 10W", veh:"carro pequeño", battKg:12, dual:false},
+  {name:"12V · 20W", veh:"camioneta / camión / náutico", battKg:20, dual:true},
+  {name:"24V · 20W", veh:"camión 24V", battKg:20, dual:true},
+].map(s => Object.assign(s, {
+  co2 : +(s.battKg*EF_CO2_PER_KG).toFixed(2),
+  slag: +(s.battKg*SLAG_PER_KG).toFixed(2)
+}));
 
-// Equivalencias divulgativas
-const TREE_KG_YEAR = 22;   // kg CO2 que absorbe un árbol maduro al año
-const CAR_KG_KM    = 0.17; // kg CO2 por km de un carro a gasolina promedio
+// Equivalencias divulgativas. Ambas se usan como DIVISOR del CO2e.
+const TREE_KG_YEAR = 22;   // kg CO2e que absorbe un árbol ya maduro en un año
+const CAR_KG_KM    = 0.17; // kg CO2e por km de un carro a gasolina promedio
+const TREE_RANGE   = [10, 40];   // varía fuertemente con especie, edad y clima
+const CAR_RANGE    = [0.11, 0.25]; // autos nuevos UE (WLTP) → vehículo típico EPA
 
-// ================= bandas de incertidumbre =================
-// Rangos reportados para los dos factores que MULTIPLICAN el resultado.
-// Se usan solo para mostrar la sensibilidad; el cálculo principal usa los
-// valores puntuales de arriba. Si se cambia un factor, cambiar también su banda.
-const EF_CO2_RANGE = [0.9, 2.5];   // kg CO2e/kg de batería procesada
-const SLAG_RANGE   = [0.08, 0.15]; // fracción del peso total de la batería
+// Tope de cordura del parque: evita que un pegado accidental produzca cifras
+// que ningún parque real sostiene.
+const MAX_VEH = 1000000;
 
 // Ficha de cada supuesto: valor, banda, dirección del sesgo y base de la cifra.
 // La columna "flag" es lo que convierte esto en instrumento y no en folleto:
@@ -593,40 +768,67 @@ const SLAG_RANGE   = [0.08, 0.15]; // fracción del peso total de la batería
 const FACTORS = [
   {
     p:"Emisión del reciclaje de plomo-ácido",
-    v:"1,5 kg CO₂e/kg", sub:"banda 0,9 – 2,5",
-    flag:["mid","Punto medio"],
-    src:"Rango reportado en estudios de análisis de ciclo de vida de fundición secundaria de plomo. "+
-        "Varía sobre todo con la matriz eléctrica del país y la tecnología de horno. No es una cifra "+
-        "normalizada de industria: se adopta el centro de la banda."
+    v:"0,40 kg CO₂e/kg", sub:"banda 0,40 – 0,65 · sobre peso de batería",
+    flag:["cons","Piso de banda"],
+    src:"Ballantyne et al. 2018 (Royal Society Open Science 5:171368) reporta ~0,55 kg CO₂/kg Pb de "+
+        "fundición más ~0,12 de refinación = 0,67 kg CO₂/kg Pb. Ojo: el paper da esos valores para plomo "+
+        "PRIMARIO y advierte que los del reciclado son distintos, así que aquí se usan como cota inferior "+
+        "por proxy. El único dato nominal sobre plomo secundario es Boliden, que declara reciclado por "+
+        "debajo de 1 kg CO₂/kg Pb (primario ~1,87), y el valor adoptado queda holgadamente por debajo. "+
+        "Convertido al peso total de batería con la fracción de plomo declarada abajo (60%–65%): 0,40 – 0,65. "+
+        "Frontera: cubre fundición y refinación, los dos procesos de mayor consumo. Las cifras de "+
+        "1–2,5 kg CO₂e/kg que circulan corresponden a FABRICAR una batería, no a reciclarla."
+  },
+  {
+    p:"Contenido de plomo de la batería",
+    v:"60% del peso", sub:"60% – 65% asumido, sin fuente nominal",
+    flag:["own","Supuesto propio"],
+    src:"Los factores de arriba están definidos por kg de plomo, no por kg de batería: esta fracción es "+
+        "la que los convierte. Se toma el piso del rango porque tanto el CO₂e como la escoria se derivan "+
+        "de ella y un valor bajo produce cifras evitadas menores. Es plomo contenido, no plomo recuperado "+
+        "en el horno; con la recuperación real (~95%) el factor quedaría algo por debajo."
   },
   {
     p:"Escoria de fundición generada",
-    v:"15% del peso", sub:"banda 8% – 15%",
-    flag:["high","Extremo alto"],
-    src:"La literatura reporta 13%–25% de escoria sobre el plomo producido; con ~60% de plomo en una "+
-        "batería equivale a 8%–15% del peso total. Se usa el tope de esa banda, así que esta cifra es "+
-        "la menos conservadora del modelo."
+    v:"15% del peso", sub:"= 25% del plomo · banda 6% – 23% sobre peso de batería",
+    flag:["high","Mitad alta"],
+    src:"Pan et al. 2019 (Resources, Conservation and Recycling 146:140-155) reporta 100–350 kg de "+
+        "escoria por tonelada de plomo producido en reciclaje secundario, o sea 10%–35% del plomo; "+
+        "con la fracción de plomo declarada arriba, 6%–23% del peso de batería. El 15% que usa la "+
+        "calculadora queda por encima del centro aritmético de esa banda (14,5%) y bastante por encima "+
+        "de su media geométrica (11,7%): sigue siendo el supuesto menos conservador del modelo, y por "+
+        "eso se marca. La banda anterior (8%–15%) no reproducía la fuente y se corrigió."
   },
   {
     p:"Extensión de vida con Battsaver",
     v:"×2", sub:"sin banda externa",
     flag:["own","Supuesto propio"],
     src:"Supuesto de desempeño de producto, el mismo que usa la calculadora comercial de repago. "+
-        "No proviene de literatura externa: debe sustentarse con datos de campo del propio parque."
+        "No proviene de literatura externa —lo público sobre mantenedores y desulfatadores es material "+
+        "de fabricante— y debe sustentarse con datos de campo del propio parque. Es el supuesto de "+
+        "mayor apalancamiento de toda la herramienta: abajo se muestra qué pasa si fuera ×1,5."
   },
   {
     p:"Absorción de un árbol maduro",
-    v:"22 kg CO₂/año", sub:"referencia ~21,7",
-    flag:["cons","Conservador"],
-    src:"US EPA, Greenhouse Gas Equivalencies Calculator. Se usa como divisor: un valor alto produce "+
-        "menos árboles equivalentes."
+    v:"22 kg CO₂e/año", sub:"varía 10 – 40 según especie, edad y clima",
+    flag:["mid","Rango medio"],
+    src:"Arbor Day Foundation: un árbol ya maduro absorbe más de 48 lb (~21,8 kg) de CO₂ al año. "+
+        "La banda 10–40 kg/año es la que publica el MIT Climate Portal. "+
+        "Ojo con una confusión frecuente: el factor del US EPA Greenhouse Gas Equivalencies Calculator "+
+        "es distinto (0,060 t CO₂ por árbol urbano PLANTADO, promediado sobre 10 años de crecimiento, "+
+        "~6 kg/año) porque mide plantar, no un árbol ya crecido. Por eso el KPI dice \"un año de N "+
+        "árboles maduros\" y no \"plantar N árboles\". Se usa como divisor."
   },
   {
     p:"Carro a gasolina",
-    v:"0,17 kg CO₂/km", sub:"banda 0,12 – 0,17",
-    flag:["cons","Conservador"],
-    src:"Extremo alto del rango típico, coherente con un parque automotor más antiguo. Al usarse como "+
-        "divisor, un factor alto produce menos kilómetros equivalentes: la cifra mostrada es la baja."
+    v:"0,17 kg CO₂e/km", sub:"banda 0,11 – 0,25",
+    flag:["mid","Rango medio"],
+    src:"Piso: Agencia Europea de Medio Ambiente, ~107 g/km WLTP en autos nuevos de la UE (las "+
+        "emisiones reales corren ~20% por encima). Techo: US EPA, vehículo de pasajeros típico, "+
+        "~400 g CO₂/milla = 0,249 kg/km con 22,2 mpg. Se usa 0,17 como valor central, coherente con un "+
+        "parque colombiano más antiguo que el europeo y más eficiente que el estadounidense. Al ser "+
+        "divisor, un factor más alto produciría menos kilómetros equivalentes. La banda anterior "+
+        "(0,12–0,17) situaba a 0,17 en el tope; con las fuentes de arriba queda en el centro."
   },
 ];
 
@@ -635,7 +837,11 @@ let state = { sku:0, perVeh:1, veh:20, life:2.5, years:5 };
 
 // ================= helpers =================
 const $ = id => document.getElementById(id);
-const fmt = (n,dec=0) => n.toLocaleString("es-CO",{minimumFractionDigits:dec,maximumFractionDigits:dec});
+// `dec` es el MÁXIMO de decimales, no un mínimo: los ceros finales no se imprimen.
+// Un entero se muestra entero ("20 baterías", no "20,0") y 0,2 se muestra "0,2" y
+// no "0,200". La precisión del cálculo no cambia — solo se deja de mostrar lo que
+// no aporta.
+const fmt = (n,dec=0) => n.toLocaleString("es-CO",{minimumFractionDigits:0,maximumFractionDigits:dec});
 
 // Cifra + unidad para la cadena de cálculo. La unidad va en su propio span para
 // que se lea como anotación y no compita con el número; el espacio es duro para
@@ -643,14 +849,68 @@ const fmt = (n,dec=0) => n.toLocaleString("es-CO",{minimumFractionDigits:dec,max
 // arrancan con "/" (por ejemplo "/año") van pegadas, sin espacio.
 const u = (n,unit) => n + (unit.charAt(0)==="/" ? "" : "&nbsp;") + `<span class="u">${unit}</span>`;
 
+// Redondea a `dec` decimales y devuelve NÚMERO (no string). La cadena de cálculo
+// la usa para propagar al paso siguiente el operando ya redondeado que se muestra
+// en pantalla, de modo que la aritmética visible cierre exactamente.
+const rnd = (n,dec) => Math.round(n*Math.pow(10,dec))/Math.pow(10,dec);
+// Decimales adaptativos: un decimal solo aporta información en cifras pequeñas.
+// "0,1 baterías" dice algo; "999.990,0 baterías" es ruido sobre siete dígitos.
+// Un decimal hasta 1.000 (por encima de eso las masas ya se muestran en toneladas)
+// y dos por debajo de 1. El escalón de redondeo queda siempre por debajo del 0,05%
+// del valor, que es lo que permite usar el MISMO número en la tarjeta y en la
+// cadena sin distorsionar el modelo.
+// Precisión adaptativa de 3 cifras significativas, el mismo criterio que `qdec` en
+// la calculadora comercial. Un decimal fijo no sirve: con 2 decimales por debajo
+// de 1, el medio escalón sobre 0,125 baterías es del 4%, y el hero llegaba a
+// sobreestimar 6,7% con sesgo neto hacia arriba — justo en la pieza cuyo argumento
+// es "adoptamos el piso, la cifra es el mínimo defendible". El escalón queda bajo
+// el 1% por paso (peor caso: el borde inferior de cada década) y el CO₂e mostrado
+// se desvía hasta ~0,8% de la matemática exacta, medido en 16.800 combinaciones.
+const dec = n => { n = Math.abs(n); return n >= 100 ? 0 : n >= 10 ? 1 : n >= 1 ? 2 : 3; };
+// Las TASAS unitarias del breakdown tienen que reconciliar con los totales de la
+// misma tarjeta: si una tasa de 0,75 kg se muestra como "0,8", multiplicarla por
+// las 20 baterías del KPI da 16 contra un total declarado de 15,0.
+const rateDec = n => Math.abs(n) < 1 ? 2 : 1;
+// Masa con la unidad que corresponda. El hero pasa a toneladas desde 1 t (§4) y a
+// partir de ~200 vehículos el resto de la página seguía en kg: la banda de
+// sensibilidad decía "1.003 kg" al lado de un hero que decía "1,0 toneladas",
+// obligando a convertir mentalmente justo donde el auditor contrasta la cifra.
+// La tonelada es además la unidad de reporte de un director de sostenibilidad.
+// Dos decimales por debajo de 10 t: con uno solo, 1.254 kg se mostraba como
+// "1,3 t" al lado de una cadena que decía "1.254 kg" — mismo valor, pero el
+// escalón de 100 kg lo hacía parecer una discrepancia.
+// La rama de toneladas usa el mismo criterio adaptativo que dec(): con 1 decimal
+// fijo imprimía "60.000,0 t", seis cifras significativas de precisión falsa.
+const massNum = kg => kg >= 1000 ? fmt(kg/1000, dec(kg/1000)) : fmt(kg, dec(kg));
+const massUnit = kg => kg >= 1000 ? "t" : "kg";
+const mass = kg => massNum(kg)+" "+massUnit(kg);
+
+// Patrón ARIA completo de radiogroup: además de role/aria-checked, aplica
+// "roving tabindex" (Tab entra y sale del grupo como una unidad, y son las flechas
+// las que mueven la selección dentro). Sin esto el lector anunciaba "opción 1 de 3"
+// y las flechas no hacían nada, que es lo contrario de lo que promete el rol.
 function segInit(id, key, cb){
-  $(id).querySelectorAll("button").forEach(b=>{
-    b.addEventListener("click",()=>{
-      $(id).querySelectorAll("button").forEach(x=>x.classList.remove("on"));
-      b.classList.add("on");
-      state[key] = isNaN(+b.dataset.v)? b.dataset.v : +b.dataset.v;
-      if(cb) cb();
-      render();
+  const btns = () => Array.from($(id).querySelectorAll("button"));
+  function select(b, focus){
+    btns().forEach(x=>{
+      const on = x===b;
+      x.classList.toggle("on", on);
+      x.setAttribute("aria-checked", on ? "true" : "false");
+      x.tabIndex = on ? 0 : -1;
+    });
+    if(focus) b.focus();
+    state[key] = isNaN(+b.dataset.v)? b.dataset.v : +b.dataset.v;
+    if(cb) cb();
+    render();
+  }
+  btns().forEach((b,i)=>{
+    b.tabIndex = b.classList.contains("on") ? 0 : -1;
+    b.addEventListener("click", ()=>select(b,false));
+    b.addEventListener("keydown", e=>{
+      const list = btns(), step = {ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1}[e.key];
+      if(step){ e.preventDefault(); select(list[(list.indexOf(b)+step+list.length)%list.length], true); }
+      else if(e.key==="Home"){ e.preventDefault(); select(list[0], true); }
+      else if(e.key==="End"){ e.preventDefault(); select(list[list.length-1], true); }
     });
   });
 }
@@ -667,49 +927,72 @@ function render(){
   // selector de baterías por vehículo: solo camiones
   $("battPerVehField").style.display = s.dual ? "" : "none";
   if(!s.dual) state.perVeh = 1;
-  else {
-    // reflejar estado en botones
-    $("battPerVeh").querySelectorAll("button").forEach(b=>{
-      b.classList.toggle("on", +b.dataset.v === state.perVeh);
-    });
-  }
+  // reflejar estado en botones (también cuando se fuerza a 1 al salir de un camión)
+  $("battPerVeh").querySelectorAll("button").forEach(b=>{
+    const on = +b.dataset.v === state.perVeh;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-checked", on ? "true" : "false");
+    b.tabIndex = on ? 0 : -1;   // el roving tabindex también al forzar perVeh=1
+  });
 
   $("skutag").innerHTML = `Equipo Battsaver <span class="price">${s.name}</span> · batería de referencia ~${s.battKg} kg`;
 
   // vida y horizonte
-  $("lifeV").textContent = state.life.toFixed(1).replace(".",",")+" años";
-  $("lifeNew").textContent = (state.life*2).toFixed(1).replace(".",",")+" años";
+  $("lifeV").textContent = fmt(state.life,1)+" años";
+  $("lifeNew").textContent = fmt(state.life*EXT_FACTOR,1)+" años";
   $("yearsV").textContent = state.years+(state.years===1?" año":" años");
+  // sin aria-valuetext el lector de pantalla anuncia "2.5" en vez de "2,5 años"
+  $("life").setAttribute("aria-valuetext", $("lifeV").textContent);
+  $("years").setAttribute("aria-valuetext", $("yearsV").textContent);
 
   // ---- baterías salvadas ----
   // Sin Battsaver, cada posición de batería consume 1/vida baterías al año.
-  // Con Battsaver la vida se duplica: consume 1/(2·vida).
-  // Baterías evitadas por posición y año = 1/vida − 1/(2·vida) = 1/(2·vida).
+  // Con Battsaver la vida se multiplica por EXT_FACTOR: consume 1/(k·vida).
+  // Evitadas por posición y año = 1/vida − 1/(k·vida) = (1 − 1/k)/vida.
+  // Con k=2 esto vale 1/(2·vida); se escribe en la forma general para que cambiar
+  // EXT_FACTOR no exija reescribir la fórmula.
+  // UNA sola tubería de cálculo. Antes había dos —la tarjeta con precisión
+  // completa y la cadena de la metodología con el redondeo propagado— y eso hacía
+  // que el hero y el paso 5 imprimieran números distintos en ~30% de las
+  // combinaciones (hasta 6,7% de diferencia con parques mínimos). La salvedad de
+  // "puede diferir en el último dígito" era literalmente cierta pero se leía como
+  // nota de redondeo. Ahora cada magnitud se redondea a la precisión con la que se
+  // muestra y ese valor es el único que circula por toda la página.
   const positions = state.veh * state.perVeh;
-  const avoidedPerPosYear = 1/(2*state.life);
-  const battSaved = positions * avoidedPerPosYear * state.years;
+  const avoidedPerPosYear = rnd((1 - 1/EXT_FACTOR)/state.life, 3);
+  const battSaved  = rnd(positions * avoidedPerPosYear * state.years, dec(positions * avoidedPerPosYear * state.years));
+  const kgAvoided  = rnd(battSaved * s.battKg,        dec(battSaved * s.battKg));
+  const co2Avoided = rnd(kgAvoided * EF_CO2_PER_KG,   dec(kgAvoided * EF_CO2_PER_KG));
+  const slagAvoided= rnd(kgAvoided * SLAG_PER_KG,     dec(kgAvoided * SLAG_PER_KG));
 
-  const kgAvoided  = battSaved * s.battKg;
-  const co2Avoided = battSaved * s.co2;      // = kgAvoided × 1.5
-  const slagAvoided= battSaved * s.slag;     // = kgAvoided × 0.15
-
-  // hero CO2
-  const co2Ton = co2Avoided/1000;
-  $("heroCo2").innerHTML = co2Ton>=1
-    ? `${fmt(co2Ton,1)} <small>toneladas de CO₂</small>`
-    : `${fmt(co2Avoided)} <small>kg de CO₂</small>`;
+  // hero CO2e — toneladas si la cifra lo amerita
+  // el número sale de massNum() —una sola implementación de la regla— y cada sitio
+  // pone su propio rótulo: el hero deletrea "toneladas", el resto abrevia "t"
+  $("heroCo2").innerHTML = `${massNum(co2Avoided)} <small>${co2Avoided>=1000?"toneladas":"kg"} de CO₂e</small>`;
   $("heroCap").textContent = `Emisiones de reciclaje evitadas por ${fmt(positions)} ${positions===1?"batería protegida":"baterías protegidas"} durante ${state.years} ${state.years===1?"año":"años"}.`;
-  $("sbVal").textContent = co2Ton>=1 ? fmt(co2Ton,1)+" t CO₂" : fmt(co2Avoided)+" kg CO₂";
+  $("sbVal").textContent = mass(co2Avoided)+" CO₂e";
 
-  // escoria
-  $("slagVal").innerHTML = `${fmt(slagAvoided,1)} <small>kg</small>`;
+  // escoria — mismo umbral de toneladas que el hero
+  $("slagVal").innerHTML = `${massNum(slagAvoided)} <small>${slagAvoided>=1000?"toneladas":"kg"}</small>`;
+
+  // horizonte: tasa anualizada, que no aparece en ninguna otra parte de la página
+  $("yearsOut").innerHTML = state.years>0
+    ? `≈ <b>${mass(co2Avoided/state.years)} CO₂e</b> por año`
+    : "";
 
   // KPIs
-  $("kBatt").textContent = fmt(battSaved,1);
+  $("kBatt").textContent = fmt(battSaved,dec(battSaved));
   $("kBattNote").textContent = `en ${fmt(positions)} ${positions===1?"posición":"posiciones"} de batería (${fmt(state.veh)} vehículo${state.veh===1?"":"s"}${state.perVeh===2?" × 2 baterías":""})`;
-  $("kKg").textContent = fmt(kgAvoided)+" kg";
-  $("kTrees").textContent = fmt(co2Avoided/TREE_KG_YEAR);
-  $("kKm").textContent = fmt(co2Avoided/CAR_KG_KM);
+  $("kKg").textContent = mass(kgAvoided);
+  $("kKgNote").textContent = `de los cuales ≈ ${mass(kgAvoided*PB_FRACTION)} son plomo`;
+  // "0 árboles" en una calculadora de impacto positivo invalida la tarjeta entera
+  // La equivalencia de árboles se redondea como la de km: tres cifras
+  // significativas sobre un factor cuya banda declarada es 10–40 (4×) es falsa
+  // precisión, y quedaba asimétrica al lado de "565 km". La banda completa vive
+  // en #mSens, que es donde la precisión sí significa algo.
+  const trees = co2Avoided/TREE_KG_YEAR, km = co2Avoided/CAR_KG_KM;
+  $("kTrees").textContent = trees>0 && trees<1 ? "<1" : fmt(trees, trees<10 ? 1 : 0);
+  $("kKm").textContent    = km>0 && km<1 ? "<1" : fmt(km);
 
   // breakdown: solo las tasas unitarias de referencia.
   // Los totales (baterías salvadas, CO₂ acumulado) NO se repiten aquí: ya están en
@@ -717,15 +1000,18 @@ function render(){
   // produce vive en la cadena de cálculo del bloque de metodología.
   $("breakdown").innerHTML = `
     <div class="brow"><span class="l">Batería de referencia (${s.veh})</span><span class="r">~${s.battKg} kg</span></div>
-    <div class="brow"><span class="l">CO₂ evitado por batería salvada</span><span class="r">${fmt(s.co2)} kg CO₂e</span></div>
-    <div class="brow"><span class="l">Escoria evitada por batería salvada</span><span class="r">${s.slag.toFixed(1).replace(".",",")} kg</span></div>
+    <div class="brow"><span class="l">CO₂e evitado por batería salvada</span><span class="r">${fmt(s.co2,rateDec(s.co2))} kg CO₂e</span></div>
+    <div class="brow"><span class="l">Escoria evitada por batería salvada</span><span class="r">${fmt(s.slag,rateDec(s.slag))} kg</span></div>
   `;
 
   // pitch
-  $("pitch").innerHTML = `Cada batería que Battsaver salva es una batería que <b>no entra a los hornos de fundición</b>: son <b>${fmt(s.co2)} kg de CO₂</b> que no se emiten y <b>${s.slag.toFixed(1).replace(".",",")} kg de escoria tóxica</b> —un residuo eterno— que nunca se generan. Tu parque evita en total <b>${co2Ton>=1? fmt(co2Ton,1)+" toneladas":fmt(co2Avoided)+" kg"} de CO₂</b> y <b>${fmt(slagAvoided,1)} kg de escoria</b>: cuidado de activos que también es gestión ambiental medible.`;
+  // pitch y barra sticky pasan por mass() como todo lo demás: eran las dos únicas
+  // cifras que quedaban fuera del helper y mostraban "1,1 toneladas" al lado de un
+  // hero que decía "1,15 toneladas"
+  $("pitch").innerHTML = `Cada batería que Battsaver salva es una batería que <b>no entra a los hornos de fundición</b>: son <b>${fmt(s.co2,rateDec(s.co2))} kg de CO₂e</b> que no se emiten y <b>${fmt(s.slag,rateDec(s.slag))} kg de escoria tóxica</b> —un residuo peligroso que termina en disposición— que no se generan. Tu parque evita en total <b>${mass(co2Avoided)} de CO₂e</b> y <b>${mass(slagAvoided)} de escoria</b> dentro del horizonte elegido: cuidado de activos que también es gestión ambiental medible.`;
 
   // supuestos (resumen; el detalle y las fuentes viven en el bloque de metodología)
-  $("assumpt").textContent = `Supuestos: reciclaje de plomo-ácido ${EF_CO2_PER_KG.toString().replace(".",",")} kg CO₂e/kg de batería procesada (banda 0,9–2,5) · escoria del 15% del peso nominal (banda 8%–15%, se usa el tope) · la vida de la batería se duplica con carga solar lenta sostenida · 1 árbol absorbe ~${TREE_KG_YEAR} kg CO₂/año · carro a gasolina ~${CAR_KG_KM.toString().replace(".",",")} kg CO₂/km. No se contabiliza la fabricación de la batería de reemplazo.`;
+  $("assumpt").textContent = `Cálculo sobre el reciclaje evitado únicamente: no incluye la fabricación de la batería de reemplazo, el transporte ni la huella del propio equipo. Los factores, sus bandas y sus fuentes están en el bloque de metodología.`;
 
   renderMethod(s, positions, avoidedPerPosYear, battSaved, kgAvoided, co2Avoided, slagAvoided);
 }
@@ -741,48 +1027,87 @@ function renderMethod(s, positions, avoidedPerPosYear, battSaved, kgAvoided, co2
   const uPos = positions===1 ? "posición" : "posiciones";
   const uBpv = state.perVeh===1 ? "batería/vehículo" : "baterías/vehículo";
 
+  // Los valores llegan ya redondeados desde render(): la cadena y la tarjeta usan
+  // exactamente los mismos números, así que la aritmética en pantalla cierra y no
+  // hay dos versiones de la misma magnitud en el documento.
+  const dB = dec(battSaved), dK = dec(kgAvoided), dC = dec(co2Avoided), dS = dec(slagAvoided);
+  const rateShown = avoidedPerPosYear, battShown = battSaved;
+  const kgShown = kgAvoided, co2Shown = co2Avoided, slagShown = slagAvoided;
+
   $("mSteps").innerHTML = `
     <li><span class="sl">Posiciones de batería protegidas</span>
         <span class="sr">${u(fmt(state.veh),uVeh)} × ${u(state.perVeh,uBpv)} = ${u(fmt(positions),uPos)}</span></li>
     <li><span class="sl">Reemplazos evitados por posición y año</span>
-        <span class="sr">${u(1,"batería")} ÷ (2 × ${u(fmt(state.life,1),"años")}) = ${u(fmt(avoidedPerPosYear,3),"baterías/año")}</span></li>
+        <span class="sr">${u(1,"batería")} ÷ ${u(fmt(state.life,1),"años")} × (1 − 1÷${EXT_FACTOR}) = ${u(fmt(rateShown,3),"baterías/año")}</span></li>
     <li><span class="sl">Baterías salvadas en ${state.years} ${yr}</span>
-        <span class="sr">${u(fmt(positions),uPos)} × ${u(fmt(avoidedPerPosYear,3),"baterías/año")} × ${u(state.years,yr)} = ${u(fmt(battSaved,1),"baterías")}</span></li>
+        <span class="sr">${u(fmt(positions),uPos)} × ${u(fmt(rateShown,3),"baterías/año")} × ${u(state.years,yr)} = ${u(fmt(battShown,dB),"baterías")}</span></li>
     <li><span class="sl">Masa de batería que no se reprocesa</span>
-        <span class="sr">${u(fmt(battSaved,1),"baterías")} × ${u(fmt(s.battKg),"kg/batería")} = ${u(fmt(kgAvoided),"kg")}</span></li>
-    <li class="res"><span class="sl">CO₂ evitado</span>
-        <span class="sr">${u(fmt(kgAvoided),"kg")} × ${u(EF_CO2_PER_KG.toString().replace(".",","),"kg CO₂e/kg")} = ${u(fmt(co2Avoided),"kg CO₂e")}</span></li>
+        <span class="sr">${u(fmt(battShown,dB),"baterías")} × ${u(fmt(s.battKg),"kg/batería")} = ${u(fmt(kgShown,dK),"kg")}</span></li>
+    <li class="res"><span class="sl">CO₂e evitado</span>
+        <span class="sr">${u(fmt(kgShown,dK),"kg")} × ${u(fmt(EF_CO2_PER_KG,2),"kg CO₂e/kg")} = ${u(fmt(co2Shown,dC),"kg CO₂e")}</span></li>
     <li class="res"><span class="sl">Escoria evitada</span>
-        <span class="sr">${u(fmt(kgAvoided),"kg")} × ${u(SLAG_PER_KG.toString().replace(".",","),"kg escoria/kg")} = ${u(fmt(slagAvoided,1),"kg escoria")}</span></li>
+        <span class="sr">${u(fmt(kgShown,dK),"kg")} × ${u(fmt(SLAG_PER_KG,2),"kg escoria/kg")} = ${u(fmt(slagShown,dS),"kg escoria")}</span></li>
   `;
 
   $("mFactors").innerHTML = FACTORS.map(f=>`
     <tr>
-      <td class="p">${f.p}<div class="src" style="font-weight:400;margin-top:5px">${f.src}</div></td>
+      <td class="p">${f.p}<div class="src">${f.src}</div></td>
       <td class="v">${f.v}<span>${f.sub}</span></td>
       <td><span class="flag ${f.flag[0]}">${f.flag[1]}</span></td>
     </tr>
   `).join("");
 
   // banda de sensibilidad sobre los dos factores que multiplican el resultado
-  const co2Lo = kgAvoided*EF_CO2_RANGE[0], co2Hi = kgAvoided*EF_CO2_RANGE[1];
-  const slagLo = kgAvoided*SLAG_RANGE[0],  slagHi = kgAvoided*SLAG_RANGE[1];
+  // Los extremos pasan por rnd() igual que el resto: sin eso volvía a haber una
+  // segunda tubería de precisión completa y el párrafo llegaba a decir
+  // "estaría entre 1,14 t y 1,86 t… reporta 1,15 t: el piso", con el valor
+  // reportado POR ENCIMA del piso que acababa de declarar.
+  // El piso coincide con co2Avoided porque EF_CO2_RANGE[0] === EF_CO2_PER_KG, pero
+  // se calcula igual que los otros tres: si algún día PB_RANGE[0] se separara de
+  // PB_FRACTION, escribirlo a mano haría que el bloque afirmara "reporta el piso"
+  // mostrando algo por encima del piso, en silencio.
+  const co2Lo  = rnd(kgAvoided*EF_CO2_RANGE[0],  dec(kgAvoided*EF_CO2_RANGE[0]));
+  const co2Hi  = rnd(kgAvoided*EF_CO2_RANGE[1], dec(kgAvoided*EF_CO2_RANGE[1]));
+  const slagLo = rnd(kgAvoided*SLAG_RANGE[0],   dec(kgAvoided*SLAG_RANGE[0]));
+  const slagHi = rnd(kgAvoided*SLAG_RANGE[1],   dec(kgAvoided*SLAG_RANGE[1]));
+  // las equivalencias divulgativas también tienen banda: son las cifras que el
+  // cliente repite fuera de la sala, y hasta ahora salían sin incertidumbre
+  // se compone la banda del CO₂e con la de la propia equivalencia, que es lo que
+  // el texto declara ("la misma incertidumbre, más la suya propia"): dividir el
+  // punto en vez de los extremos dejaba el techo ~50% corto
+  const treeLo = co2Lo/TREE_RANGE[1], treeHi = co2Hi/TREE_RANGE[0];
+  const kmLo   = co2Lo/CAR_RANGE[1],  kmHi   = co2Hi/CAR_RANGE[0];
+  // La unidad de un rango se elige UNA vez, por el extremo alto, y se aplica a los
+  // dos extremos: sin esto el rango podía cruzar el umbral de tonelada y leerse
+  // "entre 624 kg y 1,01 t", obligando a convertir mentalmente justo donde el
+  // auditor contrasta la banda.
+  const rango = (lo,hi) => hi >= 1000
+    ? [fmt(lo/1000,dec(lo/1000))+" t", fmt(hi/1000,dec(hi/1000))+" t"]
+    : [fmt(lo,dec(lo))+" kg", fmt(hi,dec(hi))+" kg"];
+  const [co2LoTxt, co2HiTxt]   = rango(co2Lo, co2Hi);
+  const [slagLoTxt, slagHiTxt] = rango(slagLo, slagHi);
   $("mSens").innerHTML = `
-    Con estos mismos datos, el <b>CO₂ evitado</b> estaría entre
-    <span class="sv">${fmt(co2Lo)} kg</span> y <span class="sv">${fmt(co2Hi)} kg</span>
+    Con estos mismos datos, el <b>CO₂e evitado</b> estaría entre
+    <span class="sv">${co2LoTxt}</span> y <span class="sv">${co2HiTxt}</span>
     según dónde caiga el factor de emisión dentro de su banda. La calculadora reporta
-    <span class="sv">${fmt(co2Avoided)} kg</span>, el punto medio.
+    <span class="sv">${mass(co2Avoided)}</span>: el <b>piso</b> de la banda adoptada.
     <span class="sr2">
-      La <b>escoria evitada</b> estaría entre <span class="sv">${fmt(slagLo,1)} kg</span> y
-      <span class="sv">${fmt(slagHi,1)} kg</span>. La calculadora reporta
-      <span class="sv">${fmt(slagAvoided,1)} kg</span>: el extremo alto de la banda, que es el supuesto
-      menos conservador del modelo.
+      La <b>escoria evitada</b> estaría entre <span class="sv">${slagLoTxt}</span> y
+      <span class="sv">${slagHiTxt}</span>. La calculadora reporta
+      <span class="sv">${mass(slagAvoided)}</span>, por encima del centro de esa banda:
+      es el supuesto menos conservador del modelo y el único que empuja el resultado hacia arriba.
+    </span>
+    <span class="sr2">
+      Las equivalencias arrastran la misma incertidumbre, más la suya propia: entre
+      <span class="sv">${fmt(treeLo,treeLo<10?1:0)}</span> y <span class="sv">${fmt(treeHi,treeHi<10?1:0)}</span>
+      árboles maduros, y entre <span class="sv">${fmt(kmLo)}</span> y <span class="sv">${fmt(kmHi)}</span> km.
+      Se muestran como referencia divulgativa, no como resultado del inventario.
     </span>
   `;
 
-  // sensibilidad al supuesto de extensión de vida: 1/(2·v) → 1/(1,5·v) da 3/4 · (1/(2·v))·2 … ver nota
+  // sensibilidad al supuesto de extensión de vida:
   // evitadas/año con factor k = (1/vida)·(1 − 1/k); con k=2 → 0,50/vida, con k=1,5 → 0,333/vida
-  const ratio = (1 - 1/1.5) / (1 - 1/2);
+  const ratio = (1 - 1/1.5) / (1 - 1/EXT_FACTOR);
   $("mExt").textContent = fmt(ratio*100,0)+"%";
 }
 
@@ -790,8 +1115,30 @@ function renderMethod(s, positions, avoidedPerPosYear, battSaved, kgAvoided, co2
 segInit("sku","sku");
 segInit("battPerVeh","perVeh");
 
-$("veh").addEventListener("input",e=>{
-  const v = Math.max(1, parseInt(e.target.value||"1",10));
+// Lectura del parque. Antes usaba parseInt, que truncaba "1e9" a 1 en silencio y
+// dejaba visible en el campo un valor (vacío, 0, negativo) distinto del que se
+// calculaba: la pantalla se contradecía a sí misma. Ahora se lee con Number, se
+// topa arriba y abajo, y en blur el campo se reescribe con el valor realmente usado.
+function readVeh(){
+  const n = Number(String($("veh").value).replace(",","."));
+  if(!isFinite(n) || n < 1) return 1;
+  return Math.min(MAX_VEH, Math.floor(n));
+}
+// En `input` solo se corrige el campo cuando el valor ya es inequívocamente
+// inválido (negativo o cero): en una demo en vivo el vendedor señala el resultado
+// con el cursor todavía dentro del input, y la pantalla no puede estar mostrando
+// "-5" mientras calcula con 1. Un campo vacío a media escritura NO se toca.
+$("veh").addEventListener("input",()=>{
+  const raw = $("veh").value, n = Number(raw);
+  state.veh = readVeh();
+  // también por encima del tope: escribiendo "1e9" el campo mostraba 1e9
+  // mientras la página ya calculaba con MAX_VEH
+  if(raw !== "" && (n <= 0 || n > MAX_VEH || !Number.isInteger(n))) $("veh").value = state.veh;
+  render();
+});
+$("veh").addEventListener("blur",()=>{
+  const v = readVeh();
+  if($("veh").value !== String(v)) $("veh").value = v;
   state.veh = v; render();
 });
 ["life","years"].forEach(id=>{
@@ -810,7 +1157,7 @@ document.querySelector(".methodlink").addEventListener("click",()=>{ $("metodolo
 window.addEventListener("beforeprint",()=>{ $("metodologia").open = true; });
 $("printBtn").addEventListener("click",()=>window.print());
 $("stickyBar").addEventListener("click",()=>{
-  document.querySelector(".results").scrollIntoView({behavior:"smooth"});
+  document.querySelector(".results").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
 });
 
 render();
